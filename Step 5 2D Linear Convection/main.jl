@@ -6,3 +6,5 @@ const dx = 2 / (nx-1);
 const dy = 2 / (ny-1);
 const sigma = 0.2;
 const dt = sigma * dx;
+
+print("Hello World")
