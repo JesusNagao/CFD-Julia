@@ -1,6 +1,6 @@
 include("init_speed.jl")
 include("time.jl")
-using Plots;
+#using Plots;
 
 const nx = 81;
 const ny = 81;
