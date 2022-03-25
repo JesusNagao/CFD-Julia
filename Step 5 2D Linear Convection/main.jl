@@ -1,3 +1,6 @@
+include("init_speed.jl")
+using Plots
+
 const nx = 81;
 const ny = 81;
 const nt = 100;
@@ -9,3 +12,11 @@ const dt = sigma * dx;
 
 x = Array{Float64}([i for i in range(0.0, stop=2.0, step=dx)])
 y = Array{Float64}([i for i in range(0.0, stop=2.0, step=dx)])
+
+u = Matrix{Float64}(undef, nx, ny)
+un = Matrix{Float64}(undef, nx, ny)
+
+init_speed(u, dx, dy)
+(X, Y) = meshgrid(x, y)
+
+plot(X, Y, u)
