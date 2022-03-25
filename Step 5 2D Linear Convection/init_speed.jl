@@ -15,5 +15,4 @@ function int(x::Float64)
 
     return floor(Int, x)
 
-
 end
