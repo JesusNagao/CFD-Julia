@@ -17,17 +17,3 @@ function int(x::Float64)
 
 
 end
-
-function meshgrid(xin::Array{Float64},yin::Array{Float64})
-    nx=length(xin)
-    ny=length(yin)
-    xout=Matrix{Float64}(undef, ny,nx)
-    yout=Matrix{Float64}(undef, ny,nx)
-    for jx=1:nx
-        for ix=1:ny
-            xout[ix,jx]=xin[jx]
-            yout[ix,jx]=yin[ix]
-        end
-    end
-    return (x=xout, y=yout)
-end

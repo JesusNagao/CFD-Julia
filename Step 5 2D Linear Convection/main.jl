@@ -17,6 +17,5 @@ u = Matrix{Float64}(undef, nx, ny)
 un = Matrix{Float64}(undef, nx, ny)
 
 init_speed(u, dx, dy)
-(X, Y) = meshgrid(x, y)
+#surface(x, y, u)
 
-surface(x, y, u)
