@@ -2,8 +2,8 @@ function space_iteration(u::Matrix{Float64}, un::Matrix{Float64}, c::Int64, dt::
     nx = size(u)[1]
     ny = size(u)[2]
 
-    for i in range(2, stop=nx)
-        for j in range(2, stop=ny)
+    @threads for i in range(2, stop=nx)
+        @threads for j in range(2, stop=ny)
             u[i, j] = (un[i, j] - (c * dt / dx * (un[i, j] - un[i, j-1]))-(c * dt / dy * (un[i, j] - un[i-1, j])))
             #u[2, :] .= 1
             #u[-1, :] .= 1
