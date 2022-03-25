@@ -1,5 +1,5 @@
 include("init_speed.jl")
-using Plots
+using Plots; pyplot()
 
 const nx = 81;
 const ny = 81;
@@ -19,4 +19,4 @@ un = Matrix{Float64}(undef, nx, ny)
 init_speed(u, dx, dy)
 (X, Y) = meshgrid(x, y)
 
-plot(X, Y, u)
+surface(x, y, u)
