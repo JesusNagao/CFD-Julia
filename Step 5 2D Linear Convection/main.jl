@@ -19,6 +19,6 @@ u = Matrix{Float64}(undef, nx, ny)
 un = Matrix{Float64}(undef, nx, ny)
 
 init_speed(u, dx, dy)
-space_iteration(u)
+space_iteration(u, un, c, dt, dx, dy)
 #surface(x, y, u)
 
