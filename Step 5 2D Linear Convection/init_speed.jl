@@ -8,6 +8,7 @@ function init_speed(u::Matrix{Float64}, dx::Float64, dy::Float64)
         end
     end
 
+    
 
 end
 

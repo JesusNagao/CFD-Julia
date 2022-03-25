@@ -1,6 +1,6 @@
 include("init_speed.jl")
 include("time.jl")
-#using Plots;
+using Plots; pyplot();
 
 const nx = 81;
 const ny = 81;
@@ -18,6 +18,7 @@ u = Matrix{Float64}(undef, nx, ny)
 un = Matrix{Float64}(undef, nx, ny)
 
 init_speed(u, dx, dy)
+surface(x, y, u)
 time_iteration(u, un, nt, c, dt, dx, dy)
 #surface(x, y, u)
 
