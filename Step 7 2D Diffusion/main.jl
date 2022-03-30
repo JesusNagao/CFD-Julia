@@ -9,3 +9,8 @@ const dt = sigma * dx * dy / nu
 
 x = Array{Float64}([i for i in range(0, stop=2, step=dx)])
 y = Array{Float64}([i for i in range(0, stop=2, step=dy)])
+
+u = Matrix{Float64}(undef, nx, ny)
+u = zeros(nx, ny)
+un = Matrix{Float64}(undef, nx, ny)
+un = zeros(nx, ny)
