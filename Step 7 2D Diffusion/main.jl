@@ -1,3 +1,5 @@
+include("Operations.jl")
+
 const nx = 31
 const ny = 31
 const nt = 17
