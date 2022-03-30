@@ -16,3 +16,6 @@ u = Matrix{Float64}(undef, nx, ny)
 u = zeros(nx, ny)
 un = Matrix{Float64}(undef, nx, ny)
 un = zeros(nx, ny)
+
+init_speed(u, x, y)
+animate(x, y, u)
