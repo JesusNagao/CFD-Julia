@@ -1,1 +1,1 @@
-** Computational Fluid Dynamics in Julia **
+# Computational Fluid Dynamics in Julia
