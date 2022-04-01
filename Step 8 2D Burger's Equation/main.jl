@@ -1,3 +1,5 @@
+include("Operations.jl")
+
 const nx = 41
 const ny = 41
 const nt = 120
@@ -23,3 +25,5 @@ vn = zeros(nx, ny)
 comb = Matrix{Float64}(undef, nx, ny)
 comb = zeros(nx, ny)
 
+init(u, v, nx, ny)
+animate(u, v, un, vn, nx, ny, dx, dy, dt, nu)
