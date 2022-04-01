@@ -23,7 +23,8 @@ function animate(x::Array{Float64}, y::Array{Float64}, u::Matrix{Float64}, nt::I
         #s = surface(x, y, u)
         un = u
         diffuse(u, un, nx, ny, dx, dy, dt, nu)
-        surface(x, y, u)
+        zlims = (0.0, 2.0)
+        surface(x, y, u, xlim=(0,2), ylim=(0,2), zlim=(0,2), legend=false)
 
     end
 
