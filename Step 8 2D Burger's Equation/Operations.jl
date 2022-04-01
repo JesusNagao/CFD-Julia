@@ -41,8 +41,6 @@ function burger(u::Matrix{Float64}, v::Matrix{Float64}, un::Matrix{Float64}, vn:
         Threads.@threads for j in range(2, stop=ny-1)
             u[i, j] = un[i,j] - dt*un[i,j]*(un[i,j]-un[i-1, j])/dx - dt*vn[i,j]*(un[i,j]-un[i, j-1])/dy + nu*dt*(un[i+1, j]-2*un[i,j]+un[i-1,j])/(dx^2) + nu*dt*(un[i,j+1]-2*un[i,j]+un[i,j-1])/(dy^2)
             v[i, j] = vn[i,j] - dt*un[i,j]*(vn[i,j]-vn[i-1, j])/dx - dt*vn[i,j]*(vn[i,j]-vn[i, j-1])/dy + nu*dt*(vn[i+1, j]-2*vn[i,j]+vn[i-1,j])/(dx^2) + nu*dt*(vn[i,j+1]-2*vn[i,j]+vn[i,j-1])/(dy^2)
-            
-            #v[i, j] = vn[i,j] + nu*dt/(dx^2)*(vn[i+1, j] - 2*vn[i,j] + vn[i-1, j]) + nu*dt/(dy^2)*(vn[i, j+1]-2*vn[i,j]+vn[i,j-1])
         end
     end
 
