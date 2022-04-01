@@ -18,4 +18,4 @@ un = Matrix{Float64}(undef, nx, ny)
 un = zeros(nx, ny)
 
 init_speed(u, x, y)
-animate(x, y, u, nx, ny)
+animate(x, y, u, nt, nx, ny, dx, dy, dt, nu)
