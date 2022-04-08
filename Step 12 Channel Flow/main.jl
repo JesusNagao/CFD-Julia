@@ -32,7 +32,12 @@ vn = zeros(nx, ny)
 udiff = 1
 stepcount = 0
 
-while udiff > 0.001
+f = Figure(resolution = (800, 800))
+Axis(f[1, 1], backgroundcolor = "black")
+strength = vec(sqrt.(u .^ 2 .+ v .^ 2))
+
+frames = 1:60
+record(f, "Channel Flow.mp4", frames; framerate = 30) do udiff
     
     global un = u
     global vn = v
@@ -55,5 +60,8 @@ while udiff > 0.001
     global udiff = (sum(u) - sum(un)) / sum(u)
     global stepcount += 1
 
-
+    arrows!(x, y, u, v, arrowsize = 10, lengthscale = 0.3,
+    arrowcolor = strength, linecolor = strength)
 end
+
+
