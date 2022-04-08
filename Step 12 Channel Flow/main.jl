@@ -1,3 +1,4 @@
+include("Operations.jl")
 
 const nx = 41
 const ny = 41
@@ -14,3 +15,14 @@ const rho = 1
 const nu = 0.1
 const F = 1
 const dt = 0.01
+
+u = Matrix{Float64}(undef, nx, ny)
+u = zeros(nx, ny)
+v = Matrix{Float64}(undef, nx, ny)
+v = zeros(nx, ny)
+p = Matrix{Float64}(undef, nx, ny)
+p = zeros(nx, ny)
+b = Matrix{Float64}(undef, nx, ny)
+b = zeros(nx, ny)
+
+build_up_b(rho, dt, dx, dy, u, v, b, nx, ny)
