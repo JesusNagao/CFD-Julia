@@ -1,4 +1,4 @@
-using GLMakie
+#using GLMakie
 
 function build_up_b(rho::Int64, dt::Float64, dx::Float64, dy::Float64, u::Matrix{Float64}, v::Matrix{Float64}, b::Matrix{Float64}, nx::Int64, ny::Int64)
 
