@@ -1,3 +1,4 @@
+using Plots
 include("Operations.jl")
 
 const nx = 41
@@ -29,16 +30,18 @@ un = zeros(nx, ny)
 vn = Matrix{Float64}(undef, nx, ny)
 vn = zeros(nx, ny)
 
+X, Y = meshgrid(x, y)
+
 udiff = 1
 stepcount = 0
 
-f = Figure(resolution = (800, 800))
-Axis(f[1, 1], backgroundcolor = "black")
-strength = vec(sqrt.(u .^ 2 .+ v .^ 2))
+#f = Figure(resolution = (800, 800))
+#Axis(f[1, 1], backgroundcolor = "black")
+#strength = vec(sqrt.(u .^ 2 .+ v .^ 2))
 
-frames = 1:30
-record(f, "Channel Flow.mp4", frames) do frame
-    
+#frames = 1:30
+#record(f, "Channel Flow.mp4", frames) do frame
+@gif while (udiff>0.001)
     #if (udiff>0.001)
     global un = u
     global vn = v
@@ -61,9 +64,10 @@ record(f, "Channel Flow.mp4", frames) do frame
     global udiff = (sum(u) - sum(un)) / sum(u)
     global stepcount += 1
     #end
-
-    arrows!(x, y, u, v, arrowsize = 10, lengthscale = 0.3,
-    arrowcolor = strength, linecolor = strength)
+    contourf(x,y,p, xlims = (0,2), ylims = (0,2), c = cgrad(:ice))
+    quiver!(X,Y, quiver= u,v , xlims = (0,2), ylims = (0,2), aspect_ratio=:equal, arrowscale=0.5)
+    #arrows!(x, y, u, v, arrowsize = 10, lengthscale = 0.3,
+    #arrowcolor = strength, linecolor = strength)
     
 end
 

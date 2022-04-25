@@ -24,3 +24,9 @@ function pressure_poisson_periodic(p::Matrix{Float64}, dx::Float64, dy::Float64,
     end
 
 end
+
+function meshgrid(x, y)
+    X = [i for i in x, j in 1:length(y)]
+    Y = [j for i in 1:length(x), j in y]
+    return X, Y
+end
