@@ -10,7 +10,7 @@ end
 
 function pressure_poisson_periodic(p::Matrix{Float64}, dx::Float64, dy::Float64, nit::Int64, nx::Int64, ny::Int64)
 
-    for j in range(1, stop=nit)
+    Threads.@threads for j in range(1, stop=nit)
     
         pn = Matrix{Float64}(undef, nx, ny)
         pn = p

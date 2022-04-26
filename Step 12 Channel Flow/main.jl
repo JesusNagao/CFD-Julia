@@ -43,8 +43,8 @@ stepcount = 0
 #record(f, "Channel Flow.mp4", frames) do frame
 @gif while (udiff>0.001)
     #if (udiff>0.001)
-    global un = u
-    global vn = v
+    un = u
+    vn = v
 
     build_up_b(rho, dt, dx, dy, u, v, b, nx, ny)
     pressure_poisson_periodic(p, dx, dy, nit, nx, ny)
@@ -61,7 +61,8 @@ stepcount = 0
     v[1, :] .= 0
     v[nx, :] .= 0
         
-    global udiff = (sum(u) - sum(un)) / sum(u)
+    #println(stepcount)
+    udiff = (sum(u) - sum(un)) / sum(u)
     global stepcount += 1
     #end
     contourf(x,y,p, xlims = (0,2), ylims = (0,2), c = cgrad(:ice))
