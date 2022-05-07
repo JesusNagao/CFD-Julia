@@ -1,7 +1,7 @@
 using PyCall
+using GLMakie
 
-#s = pyimport("main.py")
-#u = s.main()
+
 py"""
 import numpy
 from matplotlib import pyplot, cm
@@ -99,6 +99,7 @@ def main():
     udiff = 1
     stepcount = 0
     save_u = numpy.zeros((nx, ny, 500))
+    save_v = numpy.zeros((nx, ny, 500))
 
     while udiff > .001:
         un = u.copy()
@@ -189,13 +190,30 @@ def main():
 
         
         save_u[:,:, stepcount] = u[:,:]
+        save_v[:,:, stepcount] = v[:,:]
         
         udiff = (numpy.sum(u) - numpy.sum(un)) / numpy.sum(u)
         stepcount += 1
 
-    return save_u
+    return save_u, save_v, x, y
 
 
 """
-u = py"main"()
 
+
+u, v, x, y = py"main"();
+
+it = Observable(1)
+
+f = Figure(resolution = (800, 800))
+Axis(f[1, 1], backgroundcolor = "black")
+
+
+
+
+record(f, "Step 12 Channel Flow.mp4", 1:500) do it
+    
+    strength = vec(sqrt.(u[:,:,it] .^ 2 .+ v[:,:,it] .^ 2))
+    arrows!(x, y, u[:,:,it], v[:,:, it], arrowsize = 4, lengthscale = 0.2, arrowcolor = strength, linecolor = strength)
+
+end
