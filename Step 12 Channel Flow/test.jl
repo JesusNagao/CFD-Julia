@@ -214,6 +214,6 @@ Axis(f[1, 1], backgroundcolor = "black")
 record(f, "Step 12 Channel Flow.mp4", 1:500) do it
     
     strength = vec(sqrt.(u[:,:,it] .^ 2 .+ v[:,:,it] .^ 2))
-    arrows!(x, y, u[:,:,it], v[:,:, it], arrowsize = 4, lengthscale = 0.2, arrowcolor = strength, linecolor = strength)
+    arrows!(x, y, u[:,:,it], v[:,:, it], arrowsize = 6, lengthscale = 0.2, arrowcolor = strength, linecolor = strength)
 
 end
