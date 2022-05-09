@@ -1,4 +1,5 @@
 using Plots
+plotly()
 include("Operations.jl")
 using PyCall
 
@@ -36,7 +37,7 @@ pn = zeros(nx, ny)
 
 run(u, v, un, vn, nx, ny, dx, dy, rho, F, b, nit, pn, p, nu)
 
-quiver(x, y, u)
+quiver(x, y, u, v)
 #=
 f = Figure(resolution = (800, 800))
 Axis(f[1, 1], backgroundcolor = "black")
