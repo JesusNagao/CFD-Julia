@@ -1,60 +1,154 @@
-using PyCall
-py"""
+function build_up_b(u, v, b, nx, ny, dx, dy, rho)
 
-def build_up_b(rho, dt, dx, dy, u, v):
-    b = numpy.zeros_like(u)
-    b[1:-1, 1:-1] = (rho * (1 / dt * ((u[1:-1, 2:] - u[1:-1, 0:-2]) / (2 * dx) +
-                                    (v[2:, 1:-1] - v[0:-2, 1:-1]) / (2 * dy)) -
-                            ((u[1:-1, 2:] - u[1:-1, 0:-2]) / (2 * dx))**2 -
-                            2 * ((u[2:, 1:-1] - u[0:-2, 1:-1]) / (2 * dy) *
-                                (v[1:-1, 2:] - v[1:-1, 0:-2]) / (2 * dx))-
-                            ((v[2:, 1:-1] - v[0:-2, 1:-1]) / (2 * dy))**2))
-
+    
+    b[2:nx-1, 2:nx-1] = (rho .* (1 / dt .* ((u[2:nx-1, 3:nx] - u[2:nx-1, 1:nx-2]) / (2 .* dx) +
+                                      (v[3:nx, 2:nx-1] - v[1:nx-2, 2:nx-1]) / (2 .* dy)) -
+                            ((u[2:nx-1, 3:nx] - u[2:nx-1, 1:nx-2]) / (2 .* dx)) .^ 2 -
+                            2 .* ((u[3:nx, 2:nx-1] - u[1:nx-2, 2:nx-1]) / (2 .* dy) .*
+                                 (v[2:nx-1, 3:nx] - v[2:nx-1, 1:nx-2]) / (2 .* dx))-
+                            ((v[3:nx, 2:nx-1] - v[1:nx-2, 2:nx-1]) / (2 .* dy)) .^ 2))
+    
     # Periodic BC Pressure @ x = 2
-    b[1:-1, -1] = (rho * (1 / dt * ((u[1:-1, 0] - u[1:-1,-2]) / (2 * dx) +
-                                    (v[2:, -1] - v[0:-2, -1]) / (2 * dy)) -
-                        ((u[1:-1, 0] - u[1:-1, -2]) / (2 * dx))**2 -
-                        2 * ((u[2:, -1] - u[0:-2, -1]) / (2 * dy) *
-                            (v[1:-1, 0] - v[1:-1, -2]) / (2 * dx)) -
-                        ((v[2:, -1] - v[0:-2, -1]) / (2 * dy))**2))
+    b[2:nx-1, nx-1] = (rho .* (1 / dt .* ((u[2:nx-1, 1] - u[2:nx-1,nx-2]) / (2 .* dx) +
+                                    (v[3:nx, nx-1] - v[1:nx-2, nx-1]) / (2 .* dy)) -
+                          ((u[2:nx-1, 1] - u[2:nx-1, nx-2]) / (2 .* dx)) .^ 2 -
+                          2 .* ((u[3:nx, nx-1] - u[1:nx-2, nx-1]) / (2 .* dy) .*
+                               (v[2:nx-1, 1] - v[2:nx-1, nx-2]) / (2 .* dx)) -
+                          ((v[3:nx, nx-1] - v[1:nx-2, nx-1]) / (2 .* dy)) .^ 2))
 
     # Periodic BC Pressure @ x = 0
-    b[1:-1, 0] = (rho * (1 / dt * ((u[1:-1, 1] - u[1:-1, -1]) / (2 * dx) +
-                                (v[2:, 0] - v[0:-2, 0]) / (2 * dy)) -
-                        ((u[1:-1, 1] - u[1:-1, -1]) / (2 * dx))**2 -
-                        2 * ((u[2:, 0] - u[0:-2, 0]) / (2 * dy) *
-                            (v[1:-1, 1] - v[1:-1, -1]) / (2 * dx))-
-                        ((v[2:, 0] - v[0:-2, 0]) / (2 * dy))**2))
+    b[2:nx-1, 1] = (rho .* (1 / dt .* ((u[2:nx-1, 1] - u[2:nx-1, nx-1]) / (2 .* dx) +
+                                   (v[3:nx, 1] - v[1:nx-2, 1]) / (2 .* dy)) -
+                         ((u[2:nx-1, 1] - u[2:nx-1, nx-1]) / (2 .* dx)) .^ 2 -
+                         2 .* ((u[3:nx, 1] - u[1:nx-2, 1]) / (2 .* dy) .*
+                              (v[2:nx-1, 1] - v[2:nx-1, nx-1]) / (2 .* dx))-
+                         ((v[3:nx, 1] - v[1:nx-2, 1]) / (2 .* dy)) .^ 2))
 
-    return b
+end
 
-    def pressure_poisson_periodic(p, dx, dy):
-        pn = numpy.empty_like(p)
+function pressure_poisson_periodic(pn, p, nx, ny, dx, dy, b, nit)
+    
+    for q in range(1, stop=nit)
+        pn[:,:] = p[:,:]
+        p[2:nx-1, 2:nx-1] = (((pn[2:nx-1, 3:nx] + pn[2:nx-1, 1:nx-2]) * dy^2 +
+                          (pn[3:nx, 2:nx-1] + pn[1:nx-2, 2:nx-1]) * dx^2) /
+                         (2 * (dx^2 + dy^2)) -
+                         dx^2 * dy^2 / (2 * (dx^2 + dy^2)) * b[2:nx-1, 2:nx-1])
+    
+        # Periodic BC Pressure @ x = 2
+        p[2:nx-1, nx-1] = (((pn[2:nx-1, 1] + pn[2:nx-1, nx-2])* dy^2 +
+                        (pn[3:nx, nx-1] + pn[1:nx-2, nx-1]) * dx^2) /
+                       (2 * (dx^2 + dy^2)) -
+                       dx^2 * dy^2 / (2 * (dx^2 + dy^2)) * b[2:nx-1, nx-1])
+    
+        # Periodic BC Pressure @ x = 0
+        p[2:nx-1, 1] = (((pn[2:nx-1, 2] + pn[2:nx-1, nx-1])* dy^2 +
+                       (pn[3:nx, 1] + pn[1:nx-2, 1]) * dx^2) /
+                      (2 * (dx^2 + dy^2)) -
+                      dx^2 * dy^2 / (2 * (dx^2 + dy^2)) * b[2:nx-1, 1])
         
-        for q in range(nit):
-            pn = p.copy()
-            p[1:-1, 1:-1] = (((pn[1:-1, 2:] + pn[1:-1, 0:-2]) * dy**2 +
-                            (pn[2:, 1:-1] + pn[0:-2, 1:-1]) * dx**2) /
-                            (2 * (dx**2 + dy**2)) -
-                            dx**2 * dy**2 / (2 * (dx**2 + dy**2)) * b[1:-1, 1:-1])
+        # Wall boundary conditions, pressure
+        p[nx-1, :] =p[nx-2, :]  # dp/dy = 0 at y = 2
+        p[1, :] = p[2, :]  # dp/dy = 0 at y = 0
+    end
 
-            # Periodic BC Pressure @ x = 2
-            p[1:-1, -1] = (((pn[1:-1, 0] + pn[1:-1, -2])* dy**2 +
-                            (pn[2:, -1] + pn[0:-2, -1]) * dx**2) /
-                        (2 * (dx**2 + dy**2)) -
-                        dx**2 * dy**2 / (2 * (dx**2 + dy**2)) * b[1:-1, -1])
+    #print(p)
 
-            # Periodic BC Pressure @ x = 0
-            p[1:-1, 0] = (((pn[1:-1, 1] + pn[1:-1, -1])* dy**2 +
-                        (pn[2:, 0] + pn[0:-2, 0]) * dx**2) /
-                        (2 * (dx**2 + dy**2)) -
-                        dx**2 * dy**2 / (2 * (dx**2 + dy**2)) * b[1:-1, 0])
-            
-            # Wall boundary conditions, pressure
-            p[-1, :] =p[-2, :]  # dp/dy = 0 at y = 2
-            p[0, :] = p[1, :]  # dp/dy = 0 at y = 0
+end
+
+function run(u, v, un, vn, nx, ny, dx, dy, rho, F, b, nit, pn, p, nu)
+    udiff = 1
+    stepcount = 0
+
+    while stepcount < 499
+        un[:,:] = u[:,:]
+        vn[:,:] = v[:,:]
+    
+        build_up_b(u, v, b, nx, ny, dx, dy, rho)
+        pressure_poisson_periodic(pn, p, nx, ny, dx, dy, b, nit)
+    
+        u[2:nx-1, 2:nx-1] = (un[2:nx-1, 2:nx-1] -
+                         un[2:nx-1, 2:nx-1] .* dt / dx .* 
+                        (un[2:nx-1, 2:nx-1] - un[2:nx-1, 1:nx-2]) -
+                         vn[2:nx-1, 2:nx-1] .* dt / dy .* 
+                        (un[2:nx-1, 2:nx-1] - un[1:nx-2, 2:nx-1]) -
+                         dt / (2 .* rho .* dx) .* 
+                        (p[2:nx-1, 3:nx] - p[2:nx-1, 1:nx-2]) .+
+                         nu .* (dt / dx^2 .* 
+                        (un[2:nx-1, 3:nx] - 2 .* un[2:nx-1, 2:nx-1] .+ un[2:nx-1, 1:nx-2]) .+
+                         dt / dy^2 .* 
+                        (un[3:nx, 2:nx-1] - 2 .* un[2:nx-1, 2:nx-1] .+ un[1:nx-2, 2:nx-1])) .+ 
+                         F .* dt)
+    
+        v[2:nx-1, 2:nx-1] = (vn[2:nx-1, 2:nx-1] -
+                         un[2:nx-1, 2:nx-1] .* dt / dx .* 
+                        (vn[2:nx-1, 2:nx-1] - vn[2:nx-1, 1:nx-2]) -
+                         vn[2:nx-1, 2:nx-1] .* dt / dy .* 
+                        (vn[2:nx-1, 2:nx-1] - vn[1:nx-2, 2:nx-1]) -
+                         dt / (2 .* rho .* dy) .* 
+                        (p[3:nx, 2:nx-1] - p[1:nx-2, 2:nx-1]) .+
+                         nu .* (dt / dx^2 .*
+                        (vn[2:nx-1, 3:nx] - 2 .* vn[2:nx-1, 2:nx-1] .+ vn[2:nx-1, 1:nx-2]) .+
+                         dt / dy^2 .* 
+                        (vn[3:nx, 2:nx-1] - 2 .* vn[2:nx-1, 2:nx-1] .+ vn[1:nx-2, 2:nx-1])))
+    
+        # Periodic BC u @ x = 2     
+        u[2:nx-1, nx-1] = (un[2:nx-1, nx-1] - un[2:nx-1, nx-1] .* dt / dx .* 
+                      (un[2:nx-1, nx-1] - un[2:nx-1, nx-2]) -
+                       vn[2:nx-1, nx-1] .* dt / dy .* 
+                      (un[2:nx-1, nx-1] - un[1:nx-2, nx-1]) -
+                       dt / (2 .* rho .* dx) .*
+                      (p[2:nx-1, 1] - p[2:nx-1, nx-2]) .+ 
+                       nu .* (dt / dx^2 .* 
+                      (un[2:nx-1, 1] - 2 .* un[2:nx-1, nx-1] .+ un[2:nx-1, nx-2]) .+
+                       dt / dy^2 .* 
+                      (un[3:nx, nx-1] - 2 .* un[2:nx-1, nx-1] .+ un[1:nx-2, nx-1])) .+ F .* dt)
+    
+        # Periodic BC u @ x = 0
+        u[2:nx-1, 1] = (un[2:nx-1, 1] - un[2:nx-1, 1] .* dt / dx .*
+                     (un[2:nx-1, 1] - un[2:nx-1, nx-1]) -
+                      vn[2:nx-1, 1] .* dt / dy .* 
+                     (un[2:nx-1, 1] - un[1:nx-2, 1]) - 
+                      dt / (2 .* rho .* dx) .* 
+                     (p[2:nx-1, 2] - p[2:nx-1, nx-1]) .+ 
+                      nu .* (dt / dx^2 .* 
+                     (un[2:nx-1, 2] - 2 .* un[2:nx-1, 1] .+ un[2:nx-1, nx-1]) .+
+                      dt / dy^2 .*
+                     (un[3:nx, 1] - 2 .* un[2:nx-1, 1] .+ un[1:nx-2, 1])) .+ F .* dt)
+    
+        # Periodic BC v @ x = 2
+        v[2:nx-1, nx-1] = (vn[2:nx-1, nx-1] - un[2:nx-1, nx-1] .* dt / dx .*
+                      (vn[2:nx-1, nx-1] - vn[2:nx-1, nx-2]) - 
+                       vn[2:nx-1, nx-1] .* dt / dy .*
+                      (vn[2:nx-1, nx-1] - vn[1:nx-2, nx-1]) -
+                       dt / (2 .* rho .* dy) .* 
+                      (p[3:nx, nx-1] - p[1:nx-2, nx-1]) .+
+                       nu .* (dt / dx^2 .*
+                      (vn[2:nx-1, 1] - 2 .* vn[2:nx-1, nx-1] .+ vn[2:nx-1, nx-2]) .+
+                       dt / dy^2 .*
+                      (vn[3:nx, nx-1] - 2 .* vn[2:nx-1, nx-1] .+ vn[1:nx-2, nx-1])))
+    
+        # Periodic BC v @ x = 0
+        v[2:nx-1, 1] = (vn[2:nx-1, 1] - un[2:nx-1, 1] .* dt / dx .*
+                     (vn[2:nx-1, 1] - vn[2:nx-1, nx-1]) -
+                      vn[2:nx-1, 1] .* dt / dy .*
+                     (vn[2:nx-1, 1] - vn[1:nx-2, 1]) -
+                      dt / (2 .* rho .* dy) .* 
+                     (p[3:nx, 1] - p[1:nx-2, 1]) .+
+                      nu .* (dt / dx^2 .* 
+                     (vn[2:nx-1, 2] - 2 .* vn[2:nx-1, 1] .+ vn[2:nx-1, nx-1]) .+
+                      dt / dy^2 .* 
+                     (vn[3:nx, 1] - 2 .* vn[2:nx-1, 1] .+ vn[1:nx-2, 1])))
+    
+    
+        # Wall BC: u,v = 0 @ y = 0,2
+        u[1, :] .= 0
+        u[nx-1, :] .= 0
+        v[1, :] .= 0
+        v[nx-1, :] .= 0
         
-        return p
-
-
-"""
+        #udiff = (sum(u) - sum(un)) / sum(u)
+        stepcount = stepcount + 1
+        #print(stepcount)
+    end
+end

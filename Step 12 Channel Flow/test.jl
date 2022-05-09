@@ -1,6 +1,7 @@
 using PyCall
-using GLMakie
-
+#using GLMakie
+using Plots
+plotly()
 
 py"""
 import numpy
@@ -195,25 +196,39 @@ def main():
         udiff = (numpy.sum(u) - numpy.sum(un)) / numpy.sum(u)
         stepcount += 1
 
-    return save_u, save_v, x, y
+    return save_u, save_v, X, Y
 
+def graph(u, v, index):
+    fig = pyplot.figure(figsize = (11,7), dpi=100)
+    pyplot.quiver(X, Y, save_u[:,:,index], save_v[:,:,index]);
+    pyplot.show()
 
 """
 
 
 u, v, x, y = py"main"();
 
-it = Observable(1)
+#it = Observable(1)
 
+index = 30
+quiver(x, y, quiver=(u[:,:,index], v[:,:,index]))
+
+#=
 f = Figure(resolution = (800, 800))
-Axis(f[1, 1], backgroundcolor = "black")
+Axis(f[1, 1], backgroundcolor = "white")
+#strength = vec(sqrt.(u[:,:,index] .^ 2 .+ v[:,:,index] .^ 2))
+arrows!(x, y, u[:,:,index], v[:,:, index], arrowsize = 6, lengthscale = 0.2, arrowcolor = :black, linecolor = :gray)
+#print(u[:,:,index])
+f
+
+#py"graph"(u,v, index)
 
 
-
-
+#=
 record(f, "Step 12 Channel Flow.mp4", 1:500) do it
     
     strength = vec(sqrt.(u[:,:,it] .^ 2 .+ v[:,:,it] .^ 2))
     arrows!(x, y, u[:,:,it], v[:,:, it], arrowsize = 6, lengthscale = 0.2, arrowcolor = strength, linecolor = strength)
 
 end
+=#

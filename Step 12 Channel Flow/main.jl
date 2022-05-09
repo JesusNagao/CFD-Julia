@@ -1,6 +1,6 @@
 using GLMakie
-using PyCall
 include("Operations.jl")
+using PyCall
 
 const nx = 41
 const ny = 41
@@ -30,105 +30,30 @@ un = Matrix{Float64}(undef, nx, ny)
 un = zeros(nx, ny)
 vn = Matrix{Float64}(undef, nx, ny)
 vn = zeros(nx, ny)
+pn = Matrix{Float64}(undef, nx, ny)
+pn = zeros(nx, ny)
 
 
+run(u, v, un, vn, nx, ny, dx, dy, rho, F, b, nit, pn, p, nu)
+
+#=
+f = Figure(resolution = (800, 800))
+Axis(f[1, 1], backgroundcolor = "black")
+strength = vec(sqrt.(u[2:nx-1, 2:nx-1] .^ 2 .+ v[2:nx-1, 2:nx-1] .^ 2))
+arrows!(x[2:nx-1], y[2:nx-1], u[2:nx-1, 2:nx-1], v[2:nx-1, 2:nx-1], #=arrowsize = automatic, lengthscale = 0.2,=# arrowcolor = strength, linecolor = strength)
+f
+=#
 py"""
-
 import numpy
+from matplotlib import pyplot, cm
 
-def iterations(u, v, p, b, rho, nu, F, dt, nx, ny, nt, c, dx, dy)
-    udiff = 1
-    stepcount = 0
+def graficar(x, y, u, v):
+    X, Y = numpy.meshgrid(x, y)
 
-    while udiff > .001:
-        un = u.copy()
-        vn = v.copy()
-
-        b = build_up_b(rho, dt, dx, dy, u, v)
-        p = pressure_poisson_periodic(p, dx, dy)
-
-        u[1:-1, 1:-1] = (un[1:-1, 1:-1] -
-                        un[1:-1, 1:-1] * dt / dx * 
-                        (un[1:-1, 1:-1] - un[1:-1, 0:-2]) -
-                        vn[1:-1, 1:-1] * dt / dy * 
-                        (un[1:-1, 1:-1] - un[0:-2, 1:-1]) -
-                        dt / (2 * rho * dx) * 
-                        (p[1:-1, 2:] - p[1:-1, 0:-2]) +
-                        nu * (dt / dx**2 * 
-                        (un[1:-1, 2:] - 2 * un[1:-1, 1:-1] + un[1:-1, 0:-2]) +
-                        dt / dy**2 * 
-                        (un[2:, 1:-1] - 2 * un[1:-1, 1:-1] + un[0:-2, 1:-1])) + 
-                        F * dt)
-
-        v[1:-1, 1:-1] = (vn[1:-1, 1:-1] -
-                        un[1:-1, 1:-1] * dt / dx * 
-                        (vn[1:-1, 1:-1] - vn[1:-1, 0:-2]) -
-                        vn[1:-1, 1:-1] * dt / dy * 
-                        (vn[1:-1, 1:-1] - vn[0:-2, 1:-1]) -
-                        dt / (2 * rho * dy) * 
-                        (p[2:, 1:-1] - p[0:-2, 1:-1]) +
-                        nu * (dt / dx**2 *
-                        (vn[1:-1, 2:] - 2 * vn[1:-1, 1:-1] + vn[1:-1, 0:-2]) +
-                        dt / dy**2 * 
-                        (vn[2:, 1:-1] - 2 * vn[1:-1, 1:-1] + vn[0:-2, 1:-1])))
-
-        # Periodic BC u @ x = 2     
-        u[1:-1, -1] = (un[1:-1, -1] - un[1:-1, -1] * dt / dx * 
-                    (un[1:-1, -1] - un[1:-1, -2]) -
-                    vn[1:-1, -1] * dt / dy * 
-                    (un[1:-1, -1] - un[0:-2, -1]) -
-                    dt / (2 * rho * dx) *
-                    (p[1:-1, 0] - p[1:-1, -2]) + 
-                    nu * (dt / dx**2 * 
-                    (un[1:-1, 0] - 2 * un[1:-1,-1] + un[1:-1, -2]) +
-                    dt / dy**2 * 
-                    (un[2:, -1] - 2 * un[1:-1, -1] + un[0:-2, -1])) + F * dt)
-
-        # Periodic BC u @ x = 0
-        u[1:-1, 0] = (un[1:-1, 0] - un[1:-1, 0] * dt / dx *
-                    (un[1:-1, 0] - un[1:-1, -1]) -
-                    vn[1:-1, 0] * dt / dy * 
-                    (un[1:-1, 0] - un[0:-2, 0]) - 
-                    dt / (2 * rho * dx) * 
-                    (p[1:-1, 1] - p[1:-1, -1]) + 
-                    nu * (dt / dx**2 * 
-                    (un[1:-1, 1] - 2 * un[1:-1, 0] + un[1:-1, -1]) +
-                    dt / dy**2 *
-                    (un[2:, 0] - 2 * un[1:-1, 0] + un[0:-2, 0])) + F * dt)
-
-        # Periodic BC v @ x = 2
-        v[1:-1, -1] = (vn[1:-1, -1] - un[1:-1, -1] * dt / dx *
-                    (vn[1:-1, -1] - vn[1:-1, -2]) - 
-                    vn[1:-1, -1] * dt / dy *
-                    (vn[1:-1, -1] - vn[0:-2, -1]) -
-                    dt / (2 * rho * dy) * 
-                    (p[2:, -1] - p[0:-2, -1]) +
-                    nu * (dt / dx**2 *
-                    (vn[1:-1, 0] - 2 * vn[1:-1, -1] + vn[1:-1, -2]) +
-                    dt / dy**2 *
-                    (vn[2:, -1] - 2 * vn[1:-1, -1] + vn[0:-2, -1])))
-
-        # Periodic BC v @ x = 0
-        v[1:-1, 0] = (vn[1:-1, 0] - un[1:-1, 0] * dt / dx *
-                    (vn[1:-1, 0] - vn[1:-1, -1]) -
-                    vn[1:-1, 0] * dt / dy *
-                    (vn[1:-1, 0] - vn[0:-2, 0]) -
-                    dt / (2 * rho * dy) * 
-                    (p[2:, 0] - p[0:-2, 0]) +
-                    nu * (dt / dx**2 * 
-                    (vn[1:-1, 1] - 2 * vn[1:-1, 0] + vn[1:-1, -1]) +
-                    dt / dy**2 * 
-                    (vn[2:, 0] - 2 * vn[1:-1, 0] + vn[0:-2, 0])))
-
-
-        # Wall BC: u,v = 0 @ y = 0,2
-        u[0, :] = 0
-        u[-1, :] = 0
-        v[0, :] = 0
-        v[-1, :]=0
-        
-        udiff = (numpy.sum(u) - numpy.sum(un)) / numpy.sum(u)
-        stepcount += 1
+    fig = pyplot.figure(figsize = (11,7), dpi=100)
+    pyplot.quiver(X, Y, u, v);
+    pyplot.show()
 
 """
-py"iterations"(u, v, p, b, rho, nu, F, dt, nx, ny, nt, c, dx, dy)
+
+py"graficar"(x,y,u,v)

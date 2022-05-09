@@ -54,8 +54,8 @@ def pressure_poisson_periodic(p, dx, dy, nit, b):
                       dx**2 * dy**2 / (2 * (dx**2 + dy**2)) * b[1:-1, 0])
         
         # Wall boundary conditions, pressure
-        p[-1, :] =p[-2, :]  # dp/dy = 0 at y = 2
-        p[0, :] = p[1, :]  # dp/dy = 0 at y = 0
+        p[-1, :] = p[-2, :]  # dp/dy = 0 at y = 2
+        p[0, :] =  p[1, :]  # dp/dy = 0 at y = 0
     
     return p
 
@@ -181,11 +181,13 @@ def main():
         u[-1, :] = 0
         v[0, :] = 0
         v[-1, :]=0
-
-        
-        save_u[:,:, stepcount] = u[:,:]
         
         udiff = (numpy.sum(u) - numpy.sum(un)) / numpy.sum(u)
         stepcount += 1
 
-    return save_u
+    print(stepcount)
+    fig = pyplot.figure(figsize = (11,7), dpi=100)
+    pyplot.quiver(X, Y, u, v);
+    pyplot.show()        
+
+main()
