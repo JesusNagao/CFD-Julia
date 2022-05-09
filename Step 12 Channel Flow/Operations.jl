@@ -1,3 +1,5 @@
+using Plots
+
 function build_up_b(u, v, b, nx, ny, dx, dy, rho)
 
     
@@ -57,10 +59,10 @@ function pressure_poisson_periodic(pn, p, nx, ny, dx, dy, b, nit)
 end
 
 function run(u, v, un, vn, nx, ny, dx, dy, rho, F, b, nit, pn, p, nu)
-    udiff = 1
-    stepcount = 0
+    #udiff = 1
+    #stepcount = 0
 
-    while stepcount < 499
+    for i in range(1, stop=499)
         un[:,:] = u[:,:]
         vn[:,:] = v[:,:]
     
@@ -147,8 +149,9 @@ function run(u, v, un, vn, nx, ny, dx, dy, rho, F, b, nit, pn, p, nu)
         v[1, :] .= 0
         v[nx-1, :] .= 0
         
+        
         #udiff = (sum(u) - sum(un)) / sum(u)
-        stepcount = stepcount + 1
+        #stepcount = stepcount + 1
         #print(stepcount)
     end
 end
