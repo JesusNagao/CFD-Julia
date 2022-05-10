@@ -1,5 +1,4 @@
-using Plots
-plotly()
+using GLMakie
 include("Operations.jl")
 using PyCall
 
@@ -37,11 +36,28 @@ pn = zeros(nx, ny)
 
 run(u, v, un, vn, nx, ny, dx, dy, rho, F, b, nit, pn, p, nu)
 
-quiver(x, y, u, v)
-#=
+py"""
+import numpy
+from matplotlib import pyplot, cm
+
+
+def graficar(x, y, u, v):
+
+    X, Y = numpy.meshgrid(x, y)
+
+    fig = pyplot.figure(figsize = (11,7), dpi=100)
+    pyplot.quiver(X, Y, u, v);
+    pyplot.show()
+
+"""
+
+#py"graficar"(x,y,u,v)
+
+#quiver(x, y, u, v)
+
 f = Figure(resolution = (800, 800))
 Axis(f[1, 1], backgroundcolor = "black")
 strength = vec(sqrt.(u[2:nx-1, 2:nx-1] .^ 2 .+ v[2:nx-1, 2:nx-1] .^ 2))
 arrows!(x[2:nx-1], y[2:nx-1], u[2:nx-1, 2:nx-1], v[2:nx-1, 2:nx-1], #=arrowsize = automatic, lengthscale = 0.2,=# arrowcolor = strength, linecolor = strength)
 f
-=#
+
