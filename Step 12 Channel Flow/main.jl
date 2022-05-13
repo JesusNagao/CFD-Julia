@@ -54,12 +54,10 @@ def graficar(x, y, u, v):
 #py"graficar"(x,y,u,v)
 
 #quiver(x, y, u, v)
-X,Y = meshgrid(x, y)
 
-#=
-f = Figure(resolution = (800, 800))
-Axis(f[1, 1], backgroundcolor = "black")
-strength = vec(sqrt.(u .^ 2 .+ v .^ 2))
-arrows!(x, y, v, u; #=arrowsize = automatic, =#lengthscale = 0.03, arrowcolor = strength, linecolor = strength)
-f
-=#
+
+#f = Figure(resolution = (800, 800))
+#Axis(f[1, 1], backgroundcolor = "black")
+#strength = vec(sqrt.(u .^ 2 .+ v .^ 2))
+#arrows(x, y, v, u, #=arrowsize = automatic,=# lengthscale = 0.03, arrowcolor = :black, linecolor = :black, backgroundcolor = :black)
+#f

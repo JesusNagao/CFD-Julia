@@ -61,9 +61,15 @@ end
 function run(u, v, un, vn, nx, ny, dx, dy, rho, F, b, nit, pn, p, nu)
     #udiff = 1
     #stepcount = 0
-    f = Figure(resolution = (800, 800))
+    #f = Figure(resolution = (800, 800))
+    strength = vec(sqrt.(u .^ 2 .+ v .^ 2))
+    #f = arrows(x, y, v, u)
+    f = arrows(x, y, v, u, lengthscale = 0.03, arrowcolor = strength, linecolor = strength)
+    #Axis(f, backgroundcolor = "black")
+    
 
-    record(f, "Channel Flow.mp4", 1:499) do i
+    record(f, "Channel Flow.gif", 1:499) do i
+    #for i in range(1, stop=499)
         un[:,:] = u[:,:]
         vn[:,:] = v[:,:]
     
@@ -150,14 +156,11 @@ function run(u, v, un, vn, nx, ny, dx, dy, rho, F, b, nit, pn, p, nu)
         v[1, :] .= 0.0
         v[nx-1, :] .= 0.0
         
-        #f = Figure(resolution = (800, 800))
-        Axis(f[1, 1], backgroundcolor = "black")
+        #Axis(f[1, 1], backgroundcolor = "black")
         strength = vec(sqrt.(u .^ 2 .+ v .^ 2))
-        arrows!(x, y, v, u; #=arrowsize = automatic, =#lengthscale = 0.03, arrowcolor = strength, linecolor = strength)
-        sleep(0.01) # refreshes the display!
-        #udiff = (sum(u) - sum(un)) / sum(u)
-        #stepcount = stepcount + 1
-        #print(stepcount)
+        #f = arrows(x, y, v, u, lengthscale = 0.03, arrowcolor = :black, linecolor = :gray)
+        arrows!(x, y, v, u, lengthscale = 0.03, arrowcolor = :black, linecolor = :gray)
+        
     end
 end
 
