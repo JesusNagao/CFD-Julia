@@ -61,8 +61,9 @@ end
 function run(u, v, un, vn, nx, ny, dx, dy, rho, F, b, nit, pn, p, nu)
     #udiff = 1
     #stepcount = 0
+    f = Figure(resolution = (800, 800))
 
-    for i in range(1, stop=499)
+    record(f, "Channel Flow.mp4", 1:499) do i
         un[:,:] = u[:,:]
         vn[:,:] = v[:,:]
     
@@ -144,14 +145,31 @@ function run(u, v, un, vn, nx, ny, dx, dy, rho, F, b, nit, pn, p, nu)
     
     
         # Wall BC: u,v = 0 @ y = 0,2
-        u[1, :] .= 0
-        u[nx-1, :] .= 0
-        v[1, :] .= 0
-        v[nx-1, :] .= 0
+        u[1, :] .= 0.0
+        u[nx-1, :] .= 0.0
+        v[1, :] .= 0.0
+        v[nx-1, :] .= 0.0
         
         
+        Axis(f[1, 1], backgroundcolor = "black")
+        strength = vec(sqrt.(u .^ 2 .+ v .^ 2))
+        arrows!(x, y, v, u; #=arrowsize = automatic, =#lengthscale = 0.03, arrowcolor = strength, linecolor = strength)
         #udiff = (sum(u) - sum(un)) / sum(u)
         #stepcount = stepcount + 1
         #print(stepcount)
     end
+end
+
+function meshgrid(xin::Array{Float64},yin::Array{Float64})
+    nx=length(xin)
+    ny=length(yin)
+    xout=zeros(ny,nx)
+    yout=zeros(ny,nx)
+    for jx=1:nx
+        for ix=1:ny
+            xout[ix,jx]=xin[jx]
+            yout[ix,jx]=yin[ix]
+        end
+    end
+    return (x=xout, y=yout)
 end
