@@ -150,10 +150,11 @@ function run(u, v, un, vn, nx, ny, dx, dy, rho, F, b, nit, pn, p, nu)
         v[1, :] .= 0.0
         v[nx-1, :] .= 0.0
         
-        
+        #f = Figure(resolution = (800, 800))
         Axis(f[1, 1], backgroundcolor = "black")
         strength = vec(sqrt.(u .^ 2 .+ v .^ 2))
         arrows!(x, y, v, u; #=arrowsize = automatic, =#lengthscale = 0.03, arrowcolor = strength, linecolor = strength)
+        sleep(0.01) # refreshes the display!
         #udiff = (sum(u) - sum(un)) / sum(u)
         #stepcount = stepcount + 1
         #print(stepcount)
