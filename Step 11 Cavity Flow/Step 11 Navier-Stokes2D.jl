@@ -73,8 +73,8 @@ function CavityFlow(N::NavierStokes2D, exportcsv::Bool)
     dy::Float64 = 2/(ny-1) 
     dt::Float64 = 0.0001
 
-    x = LinRange(1,3,nx)
-    y = LinRange(1,3,ny)
+    x = LinRange(0,2,nx)
+    y = LinRange(0,2,ny)
 
     X, Y = meshgrid(x,y)
 
