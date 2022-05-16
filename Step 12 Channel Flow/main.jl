@@ -35,29 +35,3 @@ pn = zeros(nx, ny)
 
 
 run(u, v, un, vn, nx, ny, dx, dy, rho, F, b, nit, pn, p, nu)
-
-py"""
-import numpy
-from matplotlib import pyplot, cm
-
-
-def graficar(x, y, u, v):
-
-    X, Y = numpy.meshgrid(x, y)
-
-    fig = pyplot.figure(figsize = (11,7), dpi=100)
-    pyplot.quiver(X, Y, u, v);
-    pyplot.show()
-
-"""
-
-#py"graficar"(x,y,u,v)
-
-#quiver(x, y, u, v)
-
-
-#f = Figure(resolution = (800, 800))
-#Axis(f[1, 1], backgroundcolor = "black")
-#strength = vec(sqrt.(u .^ 2 .+ v .^ 2))
-#arrows(x, y, v, u, #=arrowsize = automatic,=# lengthscale = 0.03, arrowcolor = :black, linecolor = :black, backgroundcolor = :black)
-#f

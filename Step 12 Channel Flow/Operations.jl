@@ -1,5 +1,3 @@
-using Plots
-
 function build_up_b(u, v, b, nx, ny, dx, dy, rho)
 
     
@@ -54,22 +52,15 @@ function pressure_poisson_periodic(pn, p, nx, ny, dx, dy, b, nit)
         p[1, :] = p[2, :]  # dp/dy = 0 at y = 0
     end
 
-    #print(p)
-
 end
 
 function run(u, v, un, vn, nx, ny, dx, dy, rho, F, b, nit, pn, p, nu)
-    #udiff = 1
-    #stepcount = 0
-    #f = Figure(resolution = (800, 800))
-    strength = vec(sqrt.(u .^ 2 .+ v .^ 2))
-    #f = arrows(x, y, v, u)
-    f = arrows(x, y, v, u, lengthscale = 0.03, arrowcolor = strength, linecolor = strength)
-    #Axis(f, backgroundcolor = "black")
+
+    f = Figure(resolution = (800, 800))
+    Axis(f[1,1], backgroundcolor = "black")
     
 
     record(f, "Channel Flow.gif", 1:499) do i
-    #for i in range(1, stop=499)
         un[:,:] = u[:,:]
         vn[:,:] = v[:,:]
     
@@ -156,24 +147,8 @@ function run(u, v, un, vn, nx, ny, dx, dy, rho, F, b, nit, pn, p, nu)
         v[1, :] .= 0.0
         v[nx-1, :] .= 0.0
         
-        #Axis(f[1, 1], backgroundcolor = "black")
-        strength = vec(sqrt.(u .^ 2 .+ v .^ 2))
-        #f = arrows(x, y, v, u, lengthscale = 0.03, arrowcolor = :black, linecolor = :gray)
-        arrows!(x, y, v, u, lengthscale = 0.03, arrowcolor = :black, linecolor = :gray)
+        strength = vec(sqrt.(u[2:nx-2, 2:nx-2] .^ 2 .+ v[2:nx-2, 2:nx-2] .^ 2))
+        arrows!(x[2:nx-2], y[2:nx-2], v[2:nx-2, 2:nx-2], u[2:nx-2, 2:nx-2], lengthscale = 0.01, arrowcolor = strength, linecolor = strength)
         
     end
-end
-
-function meshgrid(xin::Array{Float64},yin::Array{Float64})
-    nx=length(xin)
-    ny=length(yin)
-    xout=zeros(ny,nx)
-    yout=zeros(ny,nx)
-    for jx=1:nx
-        for ix=1:ny
-            xout[ix,jx]=xin[jx]
-            yout[ix,jx]=yin[ix]
-        end
-    end
-    return (x=xout, y=yout)
 end
