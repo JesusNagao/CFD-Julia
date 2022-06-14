@@ -1,14 +1,12 @@
 using Plots
 
-
-function Wave(u::Array{Float64})
 const nx = 41
 const dx = 2 / (nx-1)
 const nt = 25
 const dt = 0.025
 const c = 1
 
-u::Arrau{Float64} = Array{Float64}(undef , nx);
+u = Array{Float64}(undef , nx);
 u = ones(nx)
 
 for i in range(Int(round(nx/3)), stop=Int(round(2*nx/3)))
@@ -33,4 +31,3 @@ end
 pa = plot(u)
 
 plot(pb, pa, layout=(2,1))
-end
