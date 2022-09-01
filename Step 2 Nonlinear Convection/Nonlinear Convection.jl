@@ -22,7 +22,7 @@ for i in range(1, stop=nt)
     u_old = copy(u)
     for j in range(2, stop=nx)
 
-        u[j] = u_old[j] - c * dt / dx * (u_old[j] - u_old[j-1])
+        u[j] = u_old[j] - u_old[j] * dt / dx * (u_old[j] - u_old[j-1])
 
     end
     
