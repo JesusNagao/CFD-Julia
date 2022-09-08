@@ -39,9 +39,14 @@ function run(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, p::Array{F
                     un[i,j,k] = calc_u(u, i, j, k, rho, dx, dy, dz, dt)
                     vn[i,j,k] = calc_v(v, i, j, k, rho, dx, dy, dz, dt)
                     wn[i,j,k] = calc_w(w, i, j, k, rho, dx, dy, dz, dt)
+                    pn[i,j,k] = calc_p(u, v, w, p, dx, dy, dz, rho, i, j, k)
                 end
             end
         end
+
+        u[:,:,:] = un[:,:,:]
+        v[:,:,:] = vn[:,:,:]
+        w[:,:,:] = wn[:,:,:]
 
         n = n + 1
     end
@@ -73,6 +78,16 @@ function calc_w(w::Array{Float64}, i::Int64, j::Int64, k::Int64, rho::Int64, dx:
     - u[i,j,k]*((w[i,j,k]-w[i-1,j,k])/(dx)) - v[i,j,k]*((w[i,j,k]-w[i,j-1,k])/(dy)) - w[i,j,k]*((w[i,j,k]-w[i,j,k-1])/(dz))*dt
 
     return wn
+end
+
+function calc_p(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, p::Array{Float64}, dx::Float64, dy::Float64, dz::Float64, rho::Int64, i::Int64, j::Int64, k::Int64)
+
+    p = ((dx^2*dy^2*dz^2*rho)/(2*(dy^2*dz^2+dx^2*dz^2+dy^2*dx^2))) *
+    (((u[i+1,j,k]-u[i-1,j,k])/(2*dx))^2 + ((v[i,j-1,k]-v[i,j+1,k])/(2*dy))^2 + ((w[i,j,k-1]-w[i,j,k-1])/(2*dz))^2
+    + 2*((u[i,j+1,k]-u[i,j-1,k])/(2*dy))*((v[i+1,j,k]-v[i-1,j,k])/(2*dx)) + 2*((w[i,j+1,k]-w[i,j-1,k])/(2*dy))*((v[i,j,k+1]-v[i,j,k-1])/(2*dz))
+    + 2*((u[i,j,k+1]-u[i,j,k-1])/(2*dz))*((w[i+1,j,k]-w[i-1,j,k])/(2*dx)))
+
+    return p
 end
 
 run(u, v, w, p, un, vn, wn, pn, 1, nx, ny, nz, rho, dx, dy, dz, dt)
