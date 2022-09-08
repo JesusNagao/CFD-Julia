@@ -29,10 +29,12 @@ pn = zeros(nx, ny, nz)
 
 function run(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, p::Array{Float64}, un::Array{Float64}, vn::Array{Float64}, wn::Array{Float64}, pn::Array{Float64}, nit::Int64, nx::Int64, ny::Int64, nz::Int64, rho::Int64, dx::Float64, dy::Float64, dz::Float64, dt::Float64)
 
-    f = Figure(resolution = (800, 800))
-    Axis(f[1,1], backgroundcolor = "black")
+    #f = Figure(resolution = (800, 800))
+    #Axis(f[1,1], backgroundcolor = "black")
+    n=0
 
-    record(f, "Channel Flow.gif", 1:499) do i
+    while (n<nit)
+    #record(f, "Channel Flow.gif", 1:499) do i
         for i in range(2, stop=nx-2)
             for j in range(2, stop=ny-2)
                 for k in range(2, stop=nz-2)
@@ -47,6 +49,8 @@ function run(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, p::Array{F
         u[:,:,:] = un[:,:,:]
         v[:,:,:] = vn[:,:,:]
         w[:,:,:] = wn[:,:,:]
+        p[:,:,:] = pn[:,:,:]
+        
 
         u[1, :, :] .= 0.0
         u[nx-1, :, :] .= 0.0
@@ -65,8 +69,10 @@ function run(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, p::Array{F
         
         
         
-        strength = vec(sqrt.(u[2:nx-2, 2:ny-2, 2:nz-2] .^ 2 .+ v[2:nx-2, 2:ny-2, 2:nz-2] .^ 2 .+ w[2:nx-2, 2:ny-2, 2:nz-2] .^ 2))
-        arrows!(x[2:nx-2], y[2:ny-2], z[2:nz-2], w[2:nx-2, 2:ny-2, 2:nz-2], v[2:nx-2, 2:ny-2, 2:nz-2], u[2:nx-2, 2:ny-2, 2:nz-2], lengthscale = 0.01, arrowcolor = strength, linecolor = strength)
+        #strength = vec(sqrt.(u[2:nx-2, 2:ny-2, 2:nz-2] .^ 2 .+ v[2:nx-2, 2:ny-2, 2:nz-2] .^ 2 .+ w[2:nx-2, 2:ny-2, 2:nz-2] .^ 2))
+        #arrows!(x[2:nx-2], y[2:ny-2], z[2:nz-2], w[2:nx-2, 2:ny-2, 2:nz-2], v[2:nx-2, 2:ny-2, 2:nz-2], u[2:nx-2, 2:ny-2, 2:nz-2], lengthscale = 0.01, arrowcolor = strength, linecolor = strength)
+
+        n = n + 1
 
     end
 
@@ -109,7 +115,7 @@ function calc_p(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, dx::Flo
     return p
 end
 
-function periodic_bc(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, p::Array{Float64}, nx::Int64, ny::Int64, nz::Int64, dx::Float64, dy::Float64, dz::Float64)
+function periodic_bc(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, p::Array{Float64}, nx::Int64, ny::Int64, nz::Int64, dx::Float64, dy::Float64, dz::Float64, dt::Float64)
 
     #Periodic BC at z=0 for u
     u[2:nx-1,2:ny-1,1] = u[2:nx-1,2:ny-1,1]-(p[3:nx,2:ny-1,1]-p[2:nx-2,2:ny-1,1])/(2*dx*rho)
@@ -130,6 +136,33 @@ function periodic_bc(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, p:
     v[2:nx-1,2:ny-1,nz-1] = v[2:nx-1,2:ny-1,nz-1]-(p[2:nx-1,3:ny,nz-1]-p[2:nx-1,1:ny-2,nz-1])/(2*dy*rho)
     + nu*(((v[3:nx,2:ny-1,nz-1]-2*v[2:nx-1,2:ny-1,nz-1]+v[1:nx-2,2:ny-1,nz-1])/(dx^2))+(v[2:nx-1,3:ny,nz-1]-2*v[2:nx-1,2:ny-1,nz-1]+v[2:nx-1,1:ny-2,nz-1])/(dy^2))+((v[2:nx-1,2:ny-1,1]-2*v[2:nx-1,2:ny-1,nz-1]+v[2:nx-1,2:ny-1,nz-2])/(dz^2))
     - u[2:nx-1,2:ny-1,nz-1]*((v[2:nx-1,2:ny-1,nz-1]-v[1:nx-2,2:ny-1,nz-1])/(dx)) - v[2:nx-1,2:ny-1,nz-1]*((v[2:nx-1,2:ny-1,nz-1]-v[2:nx-1,1:ny-2,nz-1])/(dy)) - w[2:nx-1,2:ny-1,nz-1]*((v[2:nx-1,2:ny-1,nz-1]-v[2:nx-1,2:ny-1,nz-2])/(dz))*dt
+    
+    #Periodic BC at z=0 for w
+    w[2:nx-1,2:ny-1,1] = w[2:nx-1,2:ny-1,1]-(p[2:nx-1,3:ny,1]-p[2:nx-1,1:ny-2,1])/(2*dz*rho)
+    + nu*(((w[3:nx,2:ny-1,1]-2*w[2:nx-1,2:ny-1,1]+w[1:nx-2,2:ny-1,1])/(dx^2))+(w[2:nx-1,3:ny,1]-2*w[2:nx-1,2:ny-1,1]+w[2:nx-1,1:ny-2,1])/(dy^2))+((w[2:nx-1,2:ny-1,2]-2*w[2:nx-1,2:ny-1,1]+w[2:nx-1,2:ny-1,nz-1])/(dz^2))
+    - u[2:nx-1,2:ny-1,1]*((w[2:nx-1,2:ny-1,1]-w[1:nx-2,2:ny-1,1])/(dx)) - v[2:nx-1,2:ny-1,1]*((w[2:nx-1,2:ny-1,1]-w[2:nx-1,1:ny-2,1])/(dy)) - w[2:nx-1,2:ny-1,1]*((w[2:nx-1,2:ny-1,1]-w[2:nx-1,2:ny-1,nz-1])/(dz))*dt
+
+    #Periodic BC at z=2 for w
+    w[2:nx-1,2:ny-1,nz-1] = w[2:nx-1,2:ny-1,nz-1]-(p[2:nx-1,3:ny,nz-1]-p[2:nx-1,1:ny-2,nz-1])/(2*dz*rho)
+    + nu*(((w[3:nx,2:ny-1,nz-1]-2*w[2:nx-1,2:ny-1,nz-1]+w[1:nx-2,2:ny-1,nz-1])/(dx^2))+(w[2:nx-1,3:ny,nz-1]-2*w[2:nx-1,2:ny-1,nz-1]+w[2:nx-1,1:ny-2,nz-1])/(dy^2))+((w[2:nx-1,2:ny-1,1]-2*w[2:nx-1,2:ny-1,nz-1]+w[2:nx-1,2:ny-1,nz-2])/(dz^2))
+    - u[2:nx-1,2:ny-1,nz-1]*((w[2:nx-1,2:ny-1,nz-1]-w[1:nx-2,2:ny-1,nz-1])/(dx)) - v[2:nx-1,2:ny-1,nz-1]*((w[2:nx-1,2:ny-1,nz-1]-w[2:nx-1,1:ny-2,nz-1])/(dy)) - w[2:nx-1,2:ny-1,nz-1]*((w[2:nx-1,2:ny-1,nz-1]-w[2:nx-1,2:ny-1,nz-2])/(dz))*dt
+
+    #Periodic BC at z=0 for p
+    p[2:nx-1,2:ny-1,1] = ((dx^2*dy^2*dz^2*rho)/(2*(dy^2*dz^2+dx^2*dz^2+dy^2*dx^2))) *
+    (((u[3:nx,2:ny-1,1]-u[1:nx-2,2:ny-1,1])/(2*dx))^2 + ((v[2:nx-1,1:ny-2,1]-v[2:nx-1,3:ny,1])/(2*dy))^2 + ((w[2:nx-1,2:ny-1,nz-1]-w[2:nx-1,2:ny-1,nz-1])/(2*dz))^2
+    + 2*((u[2:nx-1,3:ny,1]-u[2:nx-1,1:ny-2,1])/(2*dy))*((v[3:nx,2:ny-1,1]-v[1:nx,2:ny-1,1])/(2*dx)) + 2*((w[2:nx-1,3:ny,1]-w[2:nx-1,1:ny-2,1])/(2*dy))*((v[2:nx-1,2:ny-1,2]-v[2:nx-1,2:ny-1,nz-1])/(2*dz))
+    + 2*((u[2:nx-1,2:ny-1,2]-u[2:nx-1,2:ny-1,nz-1])/(2*dz))*((w[3:nx,2:ny-1,1]-w[1:nx-2,2:ny-1,1])/(2*dx)))
+    
+    #Periodic BC at z=0 for p
+    p[2:nx-1,2:ny-1,nz-1] = ((dx^2*dy^2*dz^2*rho)/(2*(dy^2*dz^2+dx^2*dz^2+dy^2*dx^2))) *
+    (((u[3:nx,2:ny-1,nz-1]-u[1:nx-2,2:ny-1,nz-1])/(2*dx))^2 + ((v[2:nx-1,1:ny-2,nz-1]-v[2:nx-1,3:ny,nz-1])/(2*dy))^2 + ((w[2:nx-1,2:ny-1,nz-2]-w[2:nx-1,2:ny-1,nz-2])/(2*dz))^2
+    + 2*((u[2:nx-1,3:ny,nz-1]-u[2:nx-1,1:ny-2,nz-1])/(2*dy))*((v[3:nx,2:ny-1,nz-1]-v[1:nx,2:ny-1,nz-1])/(2*dx)) + 2*((w[2:nx-1,3:ny,nz-1]-w[2:nx-1,1:ny-2,nz-1])/(2*dy))*((v[2:nx-1,2:ny-1,1]-v[2:nx-1,2:ny-1,nz-2])/(2*dz))
+    + 2*((u[2:nx-1,2:ny-1,1]-u[2:nx-1,2:ny-1,nz-2])/(2*dz))*((w[3:nx,2:ny-1,nz-1]-w[1:nx-2,2:ny-1,nz-1])/(2*dx)))
+
+
+    p[nx-1, ny-1,:] = p[nx-2, ny-2,:]
+    p[1, 1, :] = p[2, 2, :] 
+
 end
 
-run(u, v, w, p, un, vn, wn, pn, 1, nx, ny, nz, rho, dx, dy, dz, dt)
+run(u, v, w, p, un, vn, wn, pn, 200, nx, ny, nz, rho, dx, dy, dz, dt)
