@@ -39,7 +39,7 @@ function run(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, p::Array{F
                     un[i,j,k] = calc_u(u, i, j, k, rho, dx, dy, dz, dt)
                     vn[i,j,k] = calc_v(v, i, j, k, rho, dx, dy, dz, dt)
                     wn[i,j,k] = calc_w(w, i, j, k, rho, dx, dy, dz, dt)
-                    pn[i,j,k] = calc_p(u, v, w, p, dx, dy, dz, rho, i, j, k)
+                    pn[i,j,k] = calc_p(u, v, w, dx, dy, dz, rho, i, j, k)
                 end
             end
         end
@@ -99,7 +99,7 @@ function calc_w(w::Array{Float64}, i::Int64, j::Int64, k::Int64, rho::Int64, dx:
     return wn
 end
 
-function calc_p(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, p::Array{Float64}, dx::Float64, dy::Float64, dz::Float64, rho::Int64, i::Int64, j::Int64, k::Int64)
+function calc_p(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, dx::Float64, dy::Float64, dz::Float64, rho::Int64, i::Int64, j::Int64, k::Int64)
 
     p = ((dx^2*dy^2*dz^2*rho)/(2*(dy^2*dz^2+dx^2*dz^2+dy^2*dx^2))) *
     (((u[i+1,j,k]-u[i-1,j,k])/(2*dx))^2 + ((v[i,j-1,k]-v[i,j+1,k])/(2*dy))^2 + ((w[i,j,k-1]-w[i,j,k-1])/(2*dz))^2

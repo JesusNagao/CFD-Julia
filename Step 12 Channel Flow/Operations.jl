@@ -48,7 +48,7 @@ function pressure_poisson_periodic(pn, p, nx, ny, dx, dy, b, nit)
                       dx^2 * dy^2 / (2 * (dx^2 + dy^2)) * b[2:nx-1, 1])
         
         # Wall boundary conditions, pressure
-        p[nx-1, :] =p[nx-2, :]  # dp/dy = 0 at y = 2
+        p[nx-1, :] = p[nx-2, :]  # dp/dy = 0 at y = 2
         p[1, :] = p[2, :]  # dp/dy = 0 at y = 0
     end
 
