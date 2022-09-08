@@ -67,7 +67,7 @@ function run(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, p::Array{F
         w[:, nz-1, :] .= 0.0
 
         
-        
+        periodic_bc(u, v, w, p, nx, ny, nz, dx, dy, dz, dt, rho)
         
         #strength = vec(sqrt.(u[2:nx-2, 2:ny-2, 2:nz-2] .^ 2 .+ v[2:nx-2, 2:ny-2, 2:nz-2] .^ 2 .+ w[2:nx-2, 2:ny-2, 2:nz-2] .^ 2))
         #arrows!(x[2:nx-2], y[2:ny-2], z[2:nz-2], w[2:nx-2, 2:ny-2, 2:nz-2], v[2:nx-2, 2:ny-2, 2:nz-2], u[2:nx-2, 2:ny-2, 2:nz-2], lengthscale = 0.01, arrowcolor = strength, linecolor = strength)
@@ -115,10 +115,10 @@ function calc_p(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, dx::Flo
     return p
 end
 
-function periodic_bc(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, p::Array{Float64}, nx::Int64, ny::Int64, nz::Int64, dx::Float64, dy::Float64, dz::Float64, dt::Float64)
+function periodic_bc(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, p::Array{Float64}, nx::Int64, ny::Int64, nz::Int64, dx::Float64, dy::Float64, dz::Float64, dt::Float64, rho::Int64)
 
     #Periodic BC at z=0 for u
-    u[2:nx-1,2:ny-1,1] = u[2:nx-1,2:ny-1,1]-(p[3:nx,2:ny-1,1]-p[2:nx-2,2:ny-1,1])/(2*dx*rho)
+    u[2:nx-1,2:ny-1,1] = u[2:nx-1,2:ny-1,1]-(p[3:nx,2:ny-1,1]-p[1:nx-2,2:ny-1,1])/(2*dx*rho)
     + nu*(((u[3:nx,2:ny-1,1]-2*u[2:nx-1,2:ny-1,1]+u[1:nx-2,2:ny-1,1])/(dx^2))+((u[2:nx-1,3:ny,1]-2*u[2:nx-1,3:ny,1]+u[2:nx-1,1:ny-2,1])/(dy^2))+((u[2:nx-1,2:ny-1,2]-2*u[2:nx-1,2:ny-1,1]+u[2:nx-1,2:ny-1, nz-1])/(dz^2)))
     - u[2:nx-1,2:ny-1,1]*((u[2:nx-1,2:ny-1,1]-u[1:nx-2,2:ny-1,1])/(dx)) - v[2:nx-1,2:ny-1,1]*((u[2:nx-1,2:ny-1,1]-u[2:nx-1,1:ny-2,1])/(dy)) - w[2:nx-1,2:ny-1,1]*((u[2:nx-1,2:ny-1,1]-u[2:nx-1,2:ny-1,nz-1])/(dz))*dt
 
@@ -150,13 +150,13 @@ function periodic_bc(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, p:
     #Periodic BC at z=0 for p
     p[2:nx-1,2:ny-1,1] = ((dx^2*dy^2*dz^2*rho)/(2*(dy^2*dz^2+dx^2*dz^2+dy^2*dx^2))) *
     (((u[3:nx,2:ny-1,1]-u[1:nx-2,2:ny-1,1])/(2*dx))^2 + ((v[2:nx-1,1:ny-2,1]-v[2:nx-1,3:ny,1])/(2*dy))^2 + ((w[2:nx-1,2:ny-1,nz-1]-w[2:nx-1,2:ny-1,nz-1])/(2*dz))^2
-    + 2*((u[2:nx-1,3:ny,1]-u[2:nx-1,1:ny-2,1])/(2*dy))*((v[3:nx,2:ny-1,1]-v[1:nx,2:ny-1,1])/(2*dx)) + 2*((w[2:nx-1,3:ny,1]-w[2:nx-1,1:ny-2,1])/(2*dy))*((v[2:nx-1,2:ny-1,2]-v[2:nx-1,2:ny-1,nz-1])/(2*dz))
+    + 2*((u[2:nx-1,3:ny,1]-u[2:nx-1,1:ny-2,1])/(2*dy))*((v[3:nx,2:ny-1,1]-v[1:nx-2,2:ny-1,1])/(2*dx)) + 2*((w[2:nx-1,3:ny,1]-w[2:nx-1,1:ny-2,1])/(2*dy))*((v[2:nx-1,2:ny-1,2]-v[2:nx-1,2:ny-1,nz-1])/(2*dz))
     + 2*((u[2:nx-1,2:ny-1,2]-u[2:nx-1,2:ny-1,nz-1])/(2*dz))*((w[3:nx,2:ny-1,1]-w[1:nx-2,2:ny-1,1])/(2*dx)))
     
-    #Periodic BC at z=0 for p
+    #Periodic BC at z=2 for p
     p[2:nx-1,2:ny-1,nz-1] = ((dx^2*dy^2*dz^2*rho)/(2*(dy^2*dz^2+dx^2*dz^2+dy^2*dx^2))) *
     (((u[3:nx,2:ny-1,nz-1]-u[1:nx-2,2:ny-1,nz-1])/(2*dx))^2 + ((v[2:nx-1,1:ny-2,nz-1]-v[2:nx-1,3:ny,nz-1])/(2*dy))^2 + ((w[2:nx-1,2:ny-1,nz-2]-w[2:nx-1,2:ny-1,nz-2])/(2*dz))^2
-    + 2*((u[2:nx-1,3:ny,nz-1]-u[2:nx-1,1:ny-2,nz-1])/(2*dy))*((v[3:nx,2:ny-1,nz-1]-v[1:nx,2:ny-1,nz-1])/(2*dx)) + 2*((w[2:nx-1,3:ny,nz-1]-w[2:nx-1,1:ny-2,nz-1])/(2*dy))*((v[2:nx-1,2:ny-1,1]-v[2:nx-1,2:ny-1,nz-2])/(2*dz))
+    + 2*((u[2:nx-1,3:ny,nz-1]-u[2:nx-1,1:ny-2,nz-1])/(2*dy))*((v[3:nx,2:ny-1,nz-1]-v[1:nx-2,2:ny-1,nz-1])/(2*dx)) + 2*((w[2:nx-1,3:ny,nz-1]-w[2:nx-1,1:ny-2,nz-1])/(2*dy))*((v[2:nx-1,2:ny-1,1]-v[2:nx-1,2:ny-1,nz-2])/(2*dz))
     + 2*((u[2:nx-1,2:ny-1,1]-u[2:nx-1,2:ny-1,nz-2])/(2*dz))*((w[3:nx,2:ny-1,nz-1]-w[1:nx-2,2:ny-1,nz-1])/(2*dx)))
 
 
