@@ -1,6 +1,5 @@
 using GLMakie
 
-
 const nx = 41
 const ny = 41
 const nz = 41
@@ -30,12 +29,13 @@ pn = zeros(nx, ny, nz)
 
 function run(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, p::Array{Float64}, un::Array{Float64}, vn::Array{Float64}, wn::Array{Float64}, pn::Array{Float64}, nit::Int64, nx::Int64, ny::Int64, nz::Int64, rho::Int64, dx::Float64, dy::Float64, dz::Float64, dt::Float64)
 
-    n = 0
+    f = Figure(resolution = (800, 800))
+    Axis(f[1,1], backgroundcolor = "black")
 
-    while (n<nit)
-        for i in range(2, stop=nx-1)
-            for j in range(2, stop=ny-1)
-                for k in range(2, stop=nz-1)
+    record(f, "Channel Flow.gif", 1:499) do i
+        for i in range(2, stop=nx-2)
+            for j in range(2, stop=ny-2)
+                for k in range(2, stop=nz-2)
                     un[i,j,k] = calc_u(u, i, j, k, rho, dx, dy, dz, dt)
                     vn[i,j,k] = calc_v(v, i, j, k, rho, dx, dy, dz, dt)
                     wn[i,j,k] = calc_w(w, i, j, k, rho, dx, dy, dz, dt)
@@ -48,7 +48,26 @@ function run(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, p::Array{F
         v[:,:,:] = vn[:,:,:]
         w[:,:,:] = wn[:,:,:]
 
-        n = n + 1
+        u[1, :, :] .= 0.0
+        u[nx-1, :, :] .= 0.0
+        v[1, :, :] .= 0.0
+        v[ny-1, :, :] .= 0.0
+        w[1, :, :] .= 0.0
+        w[nz-1, :, :] .= 0.0
+
+        u[:, 1, :] .= 0.0
+        u[:, nx-1, :] .= 0.0
+        v[:, 1, :] .= 0.0
+        v[:, ny-1, :] .= 0.0
+        w[:, 1, :] .= 0.0
+        w[:, nz-1, :] .= 0.0
+
+        
+        
+        
+        strength = vec(sqrt.(u[2:nx-2, 2:ny-2, 2:nz-2] .^ 2 .+ v[2:nx-2, 2:ny-2, 2:nz-2] .^ 2 .+ w[2:nx-2, 2:ny-2, 2:nz-2] .^ 2))
+        arrows!(x[2:nx-2], y[2:ny-2], z[2:nz-2], w[2:nx-2, 2:ny-2, 2:nz-2], v[2:nx-2, 2:ny-2, 2:nz-2], u[2:nx-2, 2:ny-2, 2:nz-2], lengthscale = 0.01, arrowcolor = strength, linecolor = strength)
+
     end
 
 end
@@ -88,6 +107,22 @@ function calc_p(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, p::Arra
     + 2*((u[i,j,k+1]-u[i,j,k-1])/(2*dz))*((w[i+1,j,k]-w[i-1,j,k])/(2*dx)))
 
     return p
+end
+
+function periodic_bc(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, p::Array{Float64}, nx::Int64, ny::Int64, nz::Int64, dx::Float64, dy::Float64, dz::Float64)
+
+    #Periodic BC at z=0 for u
+    u[2:nx-1,2:ny-1,1] = u[2:nx-1,2:ny-1,1]-(p[2:nx,2:ny-1,1]-p[2:nx-2,2:ny-1,1])/(2*dx*rho)
+    + nu*(((u[2:nx,2:ny-1,1]-2*u[2:nx-1,2:ny-1,1]+u[2:nx-2,2:ny-1,1])/(dx^2))+((u[2:nx-1,2:ny,1]-2*u[2:nx-1,2:ny,1]+u[2:nx-1,2:ny-2,1])/(dy^2))+((u[2:nx-1,2:ny-1,2]-2*u[2:nx-1,2:ny-1,1]+u[2:nx-1,2:ny-1, nz-1])/(dz^2)))
+    - u[2:nx-1,2:ny-1,1]*((u[2:nx-1,2:ny-1,1]-u[2:nx-2,2:ny-1,1])/(dx)) - v[2:nx-1,2:ny-1,1]*((u[2:nx-1,2:ny-1,1]-u[2:nx-1,2:ny-2,1])/(dy)) - w[2:nx-1,2:ny-1,1]*((u[2:nx-1,2:ny-1,1]-u[2:nx-1,2:ny-1,nz-1])/(dz))*dt
+
+    #Periodic BC at z=2 for u
+    u[2:nx-1,2:ny-1,nz-1] = u[2:nx-1,2:ny-1,nz-1]-(p[2:nx,2:ny-1,nz-1]-p[2:nx-2,2:ny-1,nz-1])/(2*dx*rho)
+    + nu*(((u[2:nx,2:ny-1,nz-1]-2*u[2:nx-1,2:ny-1,nz-1]+u[2:nx-2,2:ny-1,nz-1])/(dx^2))+((u[2:nx-1,2:ny,nz-1]-2*u[2:nx-1,2:ny,nz-1]+u[2:nx-1,2:ny-2,nz-1])/(dy^2))+((u[2:nx-1,2:ny-1, 1]-2*u[2:nx-1,2:ny-1,nz-1]+u[2:nx-1,2:ny-1,nz-2])/(dz^2)))
+    - u[2:nx-1,2:ny-1,nz-1]*((u[2:nx-1,2:ny-1,nz-1]-u[2:nx-2,2:ny-1,nz-1])/(dx)) - v[2:nx-1,2:ny-1,nz-1]*((u[2:nx-1,2:ny-1,nz-1]-u[2:nx-1,2:ny-2,nz-1])/(dy)) - w[2:nx-1,2:ny-1,nz-1]*((u[2:nx-1,2:ny-1,nz-1]-u[2:nx-1,2:ny-1,nz-2])/(dz))*dt
+    
+    #Periodic BC at z=0 for u
+
 end
 
 run(u, v, w, p, un, vn, wn, pn, 1, nx, ny, nz, rho, dx, dy, dz, dt)
