@@ -59,8 +59,8 @@ function run(u, v, un, vn, nx, ny, dx, dy, rho, F, b, nit, pn, p, nu)
     f = Figure(resolution = (800, 800))
     Axis(f[1,1], backgroundcolor = "black")
     
-
-    record(f, "Channel Flow.gif", 1:499) do i
+    for i in range(0, stop=1)
+    #record(f, "Channel Flow.gif", 1:499) do i
         un[:,:] = u[:,:]
         vn[:,:] = v[:,:]
     
@@ -148,7 +148,7 @@ function run(u, v, un, vn, nx, ny, dx, dy, rho, F, b, nit, pn, p, nu)
         v[nx-1, :] .= 0.0
         
         strength = vec(sqrt.(u[2:nx-2, 2:nx-2] .^ 2 .+ v[2:nx-2, 2:nx-2] .^ 2))
-        arrows!(x[2:nx-2], y[2:nx-2], v[2:nx-2, 2:nx-2], u[2:nx-2, 2:nx-2], lengthscale = 0.01, arrowcolor = strength, linecolor = strength)
-        
+        println(length(strength))
+        #arrows!(x[2:nx-2], y[2:nx-2], v[2:nx-2, 2:nx-2], u[2:nx-2, 2:nx-2], lengthscale = 0.01, arrowcolor = strength, linecolor = strength)
     end
 end

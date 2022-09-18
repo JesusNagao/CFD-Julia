@@ -8,11 +8,13 @@ function run(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, p::Array{F
     w[:,:,:] = wn[:,:,:]
     p[:,:,:] = pn[:,:,:]
 
-    pn[nx-1, ny-1,:] = pn[nx-2, ny-2,:]
-    pn[1, 1, :] = pn[2, 2, :]
+    pn[nx-1, :,:] = pn[nx-2, :,:]
+    pn[1, :, :] = pn[2, :, :]
+    pn[:, ny-1,:] = pn[:, ny-2,:]
+    pn[:, 1, :] = pn[:, 2, :]
 
     pn[2:nx-1, 2:ny-1, 2:nz-1] = ((dx^2*dy^2*dz^2*rho)/(2*(dy^2*dz^2+dx^2*dz^2+dy^2*dx^2))) * (((u[3:nx,2:ny-1,2:nz-1]-u[1:nx-2,2:ny-1,2:nz-1])/(2*dx)).^2 .+ ((v[2:nx-1,1:ny-2,2:nz-1]-v[2:nx-1,3:ny,2:nz-1])/(2*dy)).^2 .+ ((w[2:nx-1,2:ny-1,1:nz-2]-w[2:nx-1,2:ny-1,1:nz-2])/(2*dz)).^2 .+ 2*((u[2:nx-1,3:ny,2:nz-1]-u[2:nx-1,1:ny-2,2:nz-1])/(2*dy)).*((v[3:nx,2:ny-1,2:nz-1]-v[1:nx-2,2:ny-1,2:nz-1])/(2*dx)) + 2*((w[2:nx-1,3:ny,2:nz-1]-w[2:nx-1,1:ny-2,2:nz-1])/(2*dy)).*((v[2:nx-1,2:ny-1,3:nz]-v[2:nx-1,2:ny-1,1:nz-2])/(2*dz)) + 2*((u[2:nx-1,2:ny-1,3:nz]-u[2:nx-1,2:ny-1,1:nz-2])/(2*dz)).*((w[3:nx,2:ny-1,2:nz-1]-w[1:nx-2,2:ny-1,2:nz-1])/(2*dx)))
-    un[2:nx-1, 2:ny-1, 2:nz-1] = (-(p[3:nx, 2:ny-1, 2:nz-1]-p[1:nx-2, 2:ny-1, 2:nz-1])/(rho*dx)+nu.*((u[3:nx, 2:ny-1, 2:nz-1]-2*u[2:nx-1, 2:ny-1, 2:nz-1]+u[1:nx-2, 2:ny-1, 2:nz-1])/(dx^2) + (u[2:nx-1, 3:ny, 2:nz-1] - 2*u[2:nx-1, 2:ny-1, 2:nz-1] + u[2:nx-1, 1:ny-2, 2:nz-1])/(dy^2) + (u[2:nx-1, 2:ny-1, 3:nx] - 2*u[2:nx-1, 2:ny-1, 2:nz-1] + u[2:nx-1, 2:ny-1, 1:nz-2])/(dz^2) - u[2:nx-1, 2:ny-1, 2:nz-1].*(u[2:nx-1, 2:ny-1, 2:nz-1]-u[1:nx-2, 2:ny-1, 2:nz-1])/(dx) - v[2:nx-1, 2:ny-1, 2:nz-1].*(u[2:nx-1, 2:ny-1, 2:nz-1] - u[2:nx-1, 1:ny-2, 2:nz-1])/(dy) - w[2:nx-1, 2:ny-1, 2:nz-1].*(u[2:nx-1, 2:ny-1, 2:nz-1] - u[2:nx-1, 2:ny-1, 1:nz-2])/(dz)))*dt .+ F*dt .+ u[2:nx-1, 2:ny-1, 2:nz-1]
+    un[2:nx-1, 2:ny-1, 2:nz-1] = u[2:nx-1, 2:ny-1, 2:nz-1] .+ (-(p[3:nx, 2:ny-1, 2:nz-1] - p[1:nx-2, 2:ny-1, 2:nz-1])/(2*rho*dx) + nu*((u[3:nx, 2:ny-1, 2:nz-1] - 2*u[2:nx-1, 2:ny-1, 2:nz-1] + u[1:nx-2, 2:ny-1, 2:nz-1])/(dx^2) + (u[2:nx-1, 3:ny, 2:nz-1] - 2*u[2:nx-1, 2:ny-1, 2:nz-1] + u[2:nx-1, 1:ny-2, 2:nz-1])/(dy^2) + (u[2:nx-1, 2:ny-1, 3:nx] - 2*u[2:nx-1, 2:ny-1, 2:nz-1] + u[2:nx-1, 2:ny-1, 1:nz-2])/(dz^2)) - u[2:nx-1, 2:ny-1, 2:nz-1].*(u[2:nx-1, 2:ny-1, 2:nz-1] - u[1:nx-2, 2:ny-1, 2:nz-1])/(dx) - v[2:nx-1, 2:ny-1, 2:nz-1].*(u[2:nx-1, 2:ny-1, 2:nz-1] - u[2:nx-1, 1:ny-2, 2:nz-1])/(dy) - w[2:nx-1, 2:ny-1, 2:nz-1].*(u[2:nx-1, 2:ny-1, 2:nz-1] - u[2:nx-1, 2:ny-1, 1:nz-2])/(dz))*dt .+ F*dt
     vn[2:nx-1, 2:ny-1, 2:nz-1] = v[2:nx-1, 2:ny-1, 2:nz-1] .+ (-(p[2:nx-1, 3:ny, 2:nz-1] - p[2:nx-1, 1:ny-2, 2:nx-1])/(2*dy*rho) + nu*((v[3:nx, 2:ny-1, 2:nz-1] - 2*v[2:nx-1, 2:ny-1, 2:nz-1] + v[1:nx-2, 2:ny-1, 2:nz-1])/(dx^2) + (v[2:nx-1, 3:ny, 2:nz-1] - 2*v[2:nx-1, 2:ny-1, 2:nz-1] + v[2:nx-1, 1:ny-2, 2:nz-1])/(dy^2) + (v[2:nx-1, 2:ny-1, 3:nz] - 2*v[2:nx-1, 2:ny-1, 2:nz-1] + v[2:nx-1, 2:ny-1, 1:nz-2])/(dz^2)) - u[2:nx-1, 2:ny-1, 2:nz-1].*(v[2:nx-1, 2:ny-1, 2:nz-1] - v[1:nx-2, 2:ny-1, 2:nz-1])/(dx) - v[2:nx-1, 2:ny-1, 2:nz-1].*(v[2:nx-1, 2:ny-1, 2:nz-1] - v[2:nx-1, 1:ny-2, 2:nz-1])/(dy) - w[2:nx-1, 2:ny-1, 2:nz-1].*(v[2:nx-1, 2:ny-1, 2:nz-1] - v[2:nx-1, 2:ny-1, 1:nz-2])/(dz))*dt
     wn[2:nx-1, 2:ny-1, 2:nz-1] = w[2:nx-1, 2:ny-1, 2:nz-1] .+ (-(p[2:nx-1, 2:ny-1, 3:nz] - p[2:nx-1, 2:ny-1, 1:nz-2])/(2*dz*rho) + nu*((w[3:nx, 2:ny-1, 2:nz-1] - 2*w[2:nx-1, 2:ny-1, 2:nz-1] + w[1:nx-2, 2:ny-1, 2:nz-1])/(dx^2) + (w[2:nx-1, 3:ny, 2:nz-1] - 2*w[2:nx-1, 2:ny-1, 2:nz-1] + w[2:nx-1, 1:ny-2, 2:nz-1])/(dy^2) + (w[2:nx-1, 2:ny-1, 3:nz] - 2*w[2:nx-1, 2:ny-1, 2:nz-1] + w[2:nx-1, 2:ny-1, 1:nz-2])/(dz^2)) - u[2:nx-1, 2:ny-1, 2:nz-1].*(w[2:nx-1, 2:ny-1, 2:nz-1] - w[1:nx-2, 2:ny-1, 2:nz-1])/(dx) - v[2:nx-1, 2:ny-1, 2:nz-1].*(w[2:nx-1, 2:ny-1, 2:nz-1] - w[2:nx-1, 1:ny-2, 2:nz-1])/(dy) - w[2:nx-1, 2:ny-1, 2:nz-1].*(w[2:nx-1, 2:ny-1, 2:nz-1] - w[2:nx-1, 2:ny-1, 1:nz-2])/(dz))*dt
 
@@ -30,23 +32,16 @@ function run(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, p::Array{F
     wn[:, 1, :] .= 0.0
     wn[:, ny-1, :] .= 0.0
 
-    un[:, :, 1] .= 0.0
-    un[:, :, nz-1] .= 0.0
-    vn[:, :, 1] .= 0.0
-    vn[:, :, nz-1] .= 0.0
-    wn[:, :, 1] .= 0.0
-    wn[:, :, nz-1] .= 0.0
+    #un[:, :, 1] .= 0.0
+    #un[:, :, nz-1] .= 0.0
+    #vn[:, :, 1] .= 0.0
+    #vn[:, :, nz-1] .= 0.0
+    #wn[:, :, 1] .= 0.0
+    #wn[:, :, nz-1] .= 0.0
 
     periodic_bc(un, vn, wn, pn, nx, ny, nz, dx, dy, dz, dt, rho)
-        #println(un)
-        #uvw, xyz = map3d(un, vn, wn, X, Y, Z)
 
-        #strength = vec(sqrt.(u[2:nx-2, 2:ny-2, 2:nz-2] .^ 2 .+ v[2:nx-2, 2:ny-2, 2:nz-2] .^ 2 .+ w[2:nx-2, 2:ny-2, 2:nz-2] .^ 2))
-        #arrows(xyz, uvw, lengthscale=0.01)
-
-    
-
-    return un, vn, wn
+    #return un, vn, wn
 
 end
 
@@ -136,6 +131,7 @@ function map3d(u, v, w, X, Y, Z)
     
     uvw = [Point3f(u[1,1,1], v[1,1,1], w[1,1,1])]
     xyz = [Point3f(X[1,1,1], Y[1,1,1], Z[1,1,1])]
+    strength = vec(sqrt.(u[2:nx-1, 2:ny-1, 2:nz-1] .^ 2 .+ v[2:nx-1, 2:nx-1, 2:nz-1] .^ 2 .+ w[2:nx-1, 2:ny-1, 2:nz-1]))
 
     for i in range(1, stop=nx)
         for j in range(1, stop=ny)
@@ -148,7 +144,7 @@ function map3d(u, v, w, X, Y, Z)
         end
     end
 
-    return uvw, xyz
+    return uvw, xyz, strength
 
 end
 
@@ -156,7 +152,7 @@ const nx = 41
 const ny = 41
 const nz = 41
 const nt = 10
-const nit = 51
+nit = 2
 const c = 1
 const dx = 2 / (nx - 1)
 const dy = 2 / (ny - 1)
@@ -168,7 +164,7 @@ z = Array{Float64}([i for i in range(0.0, stop=2.0, step=dz)])
 
 const rho = 1
 const nu = 0.1
-const dt = 0.01
+const dt = 0.000001
 const F = 1
 
 u = zeros(nx, ny, nz)
@@ -182,12 +178,17 @@ pn = zeros(nx, ny, nz)
 
 X,Y,Z = meshgrid3d(x,y,z)
 
-f = Figure(resolution = (800, 800))
-Axis(f[1,1], backgroundcolor = "white")
+n = 0
 
-record(f, "Channel Flow.gif", 1:200) do l
-    global u, v, w = run(u, v, w, p, un, vn, wn, pn, nx, ny, nz, rho, dx, dy, dz, dt, F, X, Y, Z)
-    uvw, xyz = map3d(u, v, w, X, Y, Z)
-    print(uvw)
-    arrows!(xyz, uvw)
+#f = Figure(resolution = (800, 800))
+#Axis(f[1,1], backgroundcolor = "white")
+
+#record(f, "Channel Flow.gif", 1:200) do l
+while n<nit 
+    run(u, v, w, p, un, vn, wn, pn, nx, ny, nz, rho, dx, dy, dz, dt, F, X, Y, Z)
+    #print(uvw)
+    #arrows!(xyz, uvw)
+    global n = n + 1
 end
+uvw, xyz, strength = map3d(un, vn, wn, X, Y, Z)
+arrows(xyz, uvw, lengtscale = 0.001, arrowsize=0.03)
