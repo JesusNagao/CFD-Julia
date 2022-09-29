@@ -1,4 +1,5 @@
-using GLMakie
+#using GLMakie
+using PyPlot
 
 function run(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, p::Array{Float64}, un::Array{Float64}, vn::Array{Float64}, wn::Array{Float64}, pn::Array{Float64}, nx::Int64, ny::Int64, nz::Int64, rho::Int64, dx::Float64, dy::Float64, dz::Float64, dt::Float64, F::Int64, X::Array{Float64}, Y::Array{Float64}, Z::Array{Float64})
     
@@ -39,7 +40,7 @@ function run(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, p::Array{F
     #wn[:, :, 1] .= 0.0
     #wn[:, :, nz-1] .= 0.0
 
-    periodic_bc(un, vn, wn, pn, nx, ny, nz, dx, dy, dz, dt, rho)
+    periodic_bc(u, v, w, un, vn, wn, pn, nx, ny, nz, dx, dy, dz, dt, rho)
 
     #return un, vn, wn
 
@@ -138,8 +139,6 @@ function periodic_bc(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, p:
     #Periodic BC at z=2 for p
     pn[2:nx-1,2:ny-1,nz-1] = ((dx^2*dy^2*dz^2*rho)/(2*(dy^2*dz^2+dx^2*dz^2+dy^2*dx^2))) * (((u[3:nx,2:ny-1,nz-1]-u[1:nx-2,2:ny-1,nz-1])/(2*dx))^2 + ((v[2:nx-1,1:ny-2,nz-1]-v[2:nx-1,3:ny,nz-1])/(2*dy))^2 + ((w[2:nx-1,2:ny-1,nz-2]-w[2:nx-1,2:ny-1,nz-2])/(2*dz))^2 + 2*((u[2:nx-1,3:ny,nz-1]-u[2:nx-1,1:ny-2,nz-1])/(2*dy))*((v[3:nx,2:ny-1,nz-1]-v[1:nx-2,2:ny-1,nz-1])/(2*dx)) + 2*((w[2:nx-1,3:ny,nz-1]-w[2:nx-1,1:ny-2,nz-1])/(2*dy))*((v[2:nx-1,2:ny-1,1]-v[2:nx-1,2:ny-1,nz-2])/(2*dz)) + 2*((u[2:nx-1,2:ny-1,1]-u[2:nx-1,2:ny-1,nz-2])/(2*dz))*((w[3:nx,2:ny-1,nz-1]-w[1:nx-2,2:ny-1,nz-1])/(2*dx)))
 
-
-
 end
 
 function meshgrid3d(xin,yin,zin)
@@ -167,7 +166,7 @@ function map3d(u, v, w, X, Y, Z)
     
     uvw = [Point3f(u[1,1,1], v[1,1,1], w[1,1,1])]
     xyz = [Point3f(X[1,1,1], Y[1,1,1], Z[1,1,1])]
-    strength = vec(sqrt.(u[2:nx-1, 2:ny-1, 2:nz-1] .^ 2 .+ v[2:nx-1, 2:nx-1, 2:nz-1] .^ 2 .+ w[2:nx-1, 2:ny-1, 2:nz-1]))
+    #strength = vec(sqrt.(u[2:nx-1, 2:ny-1, 2:nz-1] .^ 2 .+ v[2:nx-1, 2:nx-1, 2:nz-1] .^ 2 .+ w[2:nx-1, 2:ny-1, 2:nz-1]))
 
     for i in range(1, stop=nx)
         for j in range(1, stop=ny)
@@ -180,7 +179,7 @@ function map3d(u, v, w, X, Y, Z)
         end
     end
 
-    return uvw, xyz, strength
+    return uvw, xyz
 
 end
 
@@ -188,7 +187,7 @@ const nx = 41
 const ny = 41
 const nz = 41
 const nt = 10
-nit = 2
+nit = 10
 const c = 1
 const dx = 2 / (nx - 1)
 const dy = 2 / (ny - 1)
@@ -200,7 +199,7 @@ z = Array{Float64}([i for i in range(0.0, stop=2.0, step=dz)])
 
 const rho = 1
 const nu = 0.1
-dt = 0.00001
+dt = 0.001
 const F = 1
 
 u = zeros(nx, ny, nz)
@@ -222,9 +221,26 @@ n = 0
 #record(f, "Channel Flow.gif", 1:200) do l
 while n<nit 
     run(u, v, w, p, un, vn, wn, pn, nx, ny, nz, rho, dx, dy, dz, dt, F, X, Y, Z)
-    #print(uvw)
+    #print(un[:,:,40])
     #arrows!(xyz, uvw)
     global n = n + 1
 end
-uvw, xyz, strength = map3d(un, vn, wn, X, Y, Z)
-arrows(xyz, uvw, lengtscale = 0.001, arrowsize=0.03)
+
+
+
+#print(un)
+#uvw, xyz = map3d(un, vn, wn, X, Y, Z)
+#arrows(xyz, uvw, lengtscale = 0.001, arrowsize=0.03)
+
+fig = figure()
+ax = fig.gca(projection="3d")
+
+ax.quiver(x,y,z, pn, length = 0.5)
+ax.view_init(0, 45)
+
+ax.set_title("Solución a ecuaciones de momentum")
+ax.set_xlabel('x')
+ax.set_ylabel('y')
+ax.set_zlabel('z')
+
+fig
