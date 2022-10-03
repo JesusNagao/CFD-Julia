@@ -1,5 +1,5 @@
-#using GLMakie
-using PyPlot
+using GLMakie
+#using PyPlot
 
 function run(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, p::Array{Float64}, un::Array{Float64}, vn::Array{Float64}, wn::Array{Float64}, pn::Array{Float64}, nx::Int64, ny::Int64, nz::Int64, rho::Int64, dx::Float64, dy::Float64, dz::Float64, dt::Float64, F::Int64, X::Array{Float64}, Y::Array{Float64}, Z::Array{Float64})
     
@@ -228,10 +228,12 @@ end
 
 
 
-#print(un)
-#uvw, xyz = map3d(un, vn, wn, X, Y, Z)
-#arrows(xyz, uvw, lengtscale = 0.001, arrowsize=0.03)
+print(un)
+uvw, xyz = map3d(un, vn, wn, X, Y, Z)
+arrows(xyz, uvw, lengtscale = 0.001, arrowsize=0.03)
 
+
+#=
 fig = figure()
 ax = fig.gca(projection="3d")
 
@@ -244,3 +246,4 @@ ax.set_ylabel('y')
 ax.set_zlabel('z')
 
 fig
+=#
