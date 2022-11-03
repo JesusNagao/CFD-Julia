@@ -53,7 +53,7 @@ end
 
 function iterate(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, un::Array{Float64}, vn::Array{Float64}, wn::Array{Float64}, p::Array{Float64}, nx::Int64, ny::Int64, nz::Int64, nu::Float64, dx::Float64, dy::Float64, dz::Float64, dt::Float64, F::Int64)
     
-    pressure(p, u, v, w, nx, ny, nz, dx, dy, dz)
+    pressure(p, un, vn, wn, nx, ny, nz, dx, dy, dz)
     
     u[:,:,:] = un[:,:,:]
     v[:,:,:] = vn[:,:,:]
@@ -67,7 +67,7 @@ function iterate(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, un::Ar
 
     boundaries(un, vn, wn, nx, ny, nz)
 
-    print(un)
+    #print(un)
 
 end
 

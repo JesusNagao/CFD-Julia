@@ -32,6 +32,16 @@ vn = zeros(nx, ny, nz)
 wn = zeros(nx, ny, nz)
 pn = zeros(nx, ny, nz)
 
-initiate(x, y, z, u, v, w, nx, ny, nz)
-uvw, xyz, strength = map3d(u, v, w, X, Y, Z)
-arrows!(xyz, uvw, lengthscale = 0.01, arrowcolor = strength, linecolor = strength)
+f = Figure(resolution = (800, 800))
+
+initiate(x, y, z, un, vn, wn, nx, ny, nz)
+record(f, "Box.gif", 1:50) do i
+    #print("Hola")
+    Axis3(f[1,1], backgroundcolor = "black")
+    iterate(u,v,w,un,vn,wn,p,nx,ny, nz,nu,dx,dy,dz,dt,F)
+    uvw, xyz, strength = map3d(un, vn, wn, X, Y, Z)
+    arrows!(xyz, uvw, lengthscale = 0.001, arrowcolor = strength, linecolor = strength)
+end
+
+#iterate(u,v,w,un,vn,wn,p,nx,ny, nz,nu,dx,dy,dz,dt,F)
+
