@@ -12,7 +12,7 @@ function run()
     u = Array{Float64}(undef , nx);
     u = ones(nx)
 
-    @btime for i in range(Int(round(nx/3)), stop=Int(round(2*nx/3)))
+    for i in range(Int(round(nx/3)), stop=Int(round(2*nx/3)))
 
         u[i] = 2;
 
