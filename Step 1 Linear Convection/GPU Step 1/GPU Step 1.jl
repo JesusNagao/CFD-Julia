@@ -1,5 +1,7 @@
 using CUDA
-using GLMakie
+using Plots
+include("Operations.jl")
+using BenchmarkTools
 
 CUDA.allowscalar(false)
 
@@ -10,10 +12,11 @@ const dt = 0.025
 const c = 1
 
 function run()
+
     u = CuArray{Float64}(undef , nx);
     u = CUDA.ones(nx)
 
-    @btime CUDA.allowscalar() do
+    CUDA.allowscalar() do
 
         for i in range(Int(round(nx/3)), stop=Int(round(2*nx/3)))
 
@@ -24,37 +27,26 @@ function run()
     end
 
     up = Array(u) 
-
     pb = plot(up)
 
-    u_old = CuArray{Float64}(undef, nx)
-    u_new = CuArray{Float64}(undef, nx)
-    un = CuArray{Float64}(undef, nx-1)
 
-    for i in range(1, stop=nt)
-        
-        u_old = u[2:nx]
-        u_new = u[1:nx-1]
+    u_new = CuArray{Float64}(undef, nx-1)
 
-        #println(length(u[2:nx]))
+    for j in range(1, stop=nt)
+        uf = u[1:nx-1]
+        ub = u[2:nx]
 
-        un = u_old .+ ( - c * dt / dx) * (u_old .- u_new)
+        @cuda threads=40 kernel_step_1!(u_new, uf, ub, c, dt, dx)
+        synchronize()
 
-        #=
-        CUDA.allowscalar() do 
-
-            for i in range(2, stop=nx)
-                u[i] = un[i]
-            end
-        end
-        =#
+        u[2:nx] = u_new
     end
 
-    up = Array(un)
-
+    up = Array(u)
     pa = plot(up)
 
     plot(pb, pa, layout=(2,1))
+
 end
 
 @btime run()

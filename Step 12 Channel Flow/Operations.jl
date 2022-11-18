@@ -152,3 +152,10 @@ function run(u, v, un, vn, nx, ny, dx, dy, rho, F, b, nit, pn, p, nu)
         arrows!(x[2:nx-2], y[2:nx-2], v[2:nx-2, 2:nx-2], u[2:nx-2, 2:nx-2], lengthscale = 0.01, arrowcolor = strength, linecolor = strength)
     end
 end
+
+function run_kernel()
+    
+
+
+
+end
