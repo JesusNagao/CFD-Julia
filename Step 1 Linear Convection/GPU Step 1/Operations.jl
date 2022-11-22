@@ -1,8 +1,22 @@
-function kernel_step_1!(u_new, uf, ub, c, dt, dx)
+function kernel_step_1!(u, u_old, c, dt, dx, nx)
     i = threadIdx().x
 
-    u_new[i] = uf[i] - c * dt / dx * (uf[i] - ub[i])
+    if (i>1 && i<nx)
+        u[i] = u_old[i] - c * dt / dx * (u_old[i] - u_old[i-1])
+    end
 
-    #@cuprint(u_new)
     return
+end
+
+function initialize!(u, nx)
+    i = threadIdx().x
+
+    if (i>Int(round(nx/3)) && i<Int(round(2*nx/3)))
+
+        u[i] = 2.0
+
+    end
+
+    return
+
 end

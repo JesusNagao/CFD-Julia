@@ -16,30 +16,23 @@ function run()
     u = CuArray{Float64}(undef , nx);
     u = CUDA.ones(nx)
 
-    CUDA.allowscalar() do
-
-        for i in range(Int(round(nx/3)), stop=Int(round(2*nx/3)))
-
-            u[i] = 2;
-
-        end
-
-    end
-
+    @cuda threads=41 initialize!(u, nx)
+    #synchronize()
+    
+    
     up = Array(u) 
     pb = plot(up)
 
 
-    u_new = CuArray{Float64}(undef, nx-1)
+    u_old = CuArray{Float64}(undef, nx)
 
     for j in range(1, stop=nt)
-        uf = u[1:nx-1]
-        ub = u[2:nx]
 
-        @cuda threads=40 kernel_step_1!(u_new, uf, ub, c, dt, dx)
-        synchronize()
+        u_old = copy(u)
 
-        u[2:nx] = u_new
+        @cuda threads=41 kernel_step_1!(u, u_old, c, dt, dx, nx)
+        #synchronize()
+
     end
 
     up = Array(u)
@@ -50,3 +43,4 @@ function run()
 end
 
 @btime run()
+#run()
