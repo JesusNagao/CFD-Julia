@@ -33,4 +33,6 @@ vn = CUDA.zeros(nx, ny)
 pn = CuArray{Float64}(undef, nx, ny)
 pn = CUDA.zeros(nx, ny)
 
-run_gpu()
+run_gpu(u, v, un, vn, p, pn, b, nx, ny, dx, dy, rho, dt, nit, F)
+#@cuda blocks=nx threads=ny build_up_b(nx, ny)
+#synchronize()
