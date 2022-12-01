@@ -1,16 +1,18 @@
 function run_gpu(u::CuArray, v::CuArray, un::CuArray, vn::CuArray, p::CuArray, pn::CuArray, b::CuArray, nx::Int64, ny::Int64, dx::Float64, dy::Float64, rho::Int64, dt::Float64, nit::Int64, F::Int64)
 
-     for i in range(1, stop=nit)
+     @cuda blocks=nx threads=ny build_up_b!(b, dx, dy, nx, ny, rho, dt)
+
+     #=for i in range(1, stop=nit)
           un = copy(u)
           vn = copy(v)
 
           @cuda blocks=nx threads=ny build_up_b!(b, dx, dy, nx, ny, rho, dt)
           pressure_poisson_periodic(p, pn, dx, dy, nx, ny, nit)
      end
-
+     =#
 end
 
-function build_up_b!(b::CuArray, dx::Float64, dy::Float64, nx::Int64, ny::Int64, rho::Int64, dt::Float64)
+function build_up_b!(b, dx::Float64, dy::Float64, nx::Int64, ny::Int64, rho::Int64, dt::Float64)
 
     i = threadIdx().x
     j = blockIdx().x
