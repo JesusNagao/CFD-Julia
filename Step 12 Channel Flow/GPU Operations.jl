@@ -16,31 +16,36 @@ function build_up_b!(b, dx::Float64, dy::Float64, nx::Int64, ny::Int64, rho::Int
 
     i = threadIdx().x
     j = blockIdx().x
-
-    if (i>1 && i<nx && j>1 && j<ny )
-     b[i+1, j+1] = (rho * (1 / dt * ((u[i+1, j] - u[i+1, j-1]) / (2 * dx) +
-                                        (v[i, j+1] - v[j-1, j+1]) / (2 * dy)) -
-                              ((u[i+1, j] - u[i+1, j-1]) / (2 * dx))^2 -
-                              2 * ((u[i, j+1] - u[j-1, j+1]) / (2 * dy) *
-                                   (v[i+1, j] - v[i+1, j-1]) / (2 * dx))-
-                              ((v[i, j+1] - v[j-1, j+1]) / (2 * dy))^2))
      
-     # Periodic BC Pressure @ x = 2
-     b[i+1, ny] = (rho * (1 / dt * ((u[i+1, 2] - u[i+1, ny-1]) / (2 * dx) +
-                                        (v[i, ny] - v[j-1, ny]) / (2 * dy)) -
-                              ((u[i+1, 2] - u[i+1, ny-1]) / (2 * dx))^2 -
-                              2 * ((u[i, ny] - u[j-1, ny]) / (2 * dy) *
-                                   (v[i+1, 2] - v[i+1, ny-1]) / (2 * dx)) -
-                              ((v[i, ny] - v[j-1, ny]) / (2 * dy))^2))
+    
+     if (i>1 && i<nx && j>1 && j<ny )
+          @cuprintln(i)
+          @cuprintln(j)
+          @cuprintln(" ")
+          #=
+          b[i+1, j+1] = (rho * (1 / dt * ((u[i+1, j] - u[i+1, j-1]) / (2 * dx) +
+                                             (v[i, j+1] - v[j-1, j+1]) / (2 * dy)) -
+                                   ((u[i+1, j] - u[i+1, j-1]) / (2 * dx))^2 -
+                                   2 * ((u[i, j+1] - u[j-1, j+1]) / (2 * dy) *
+                                        (v[i+1, j] - v[i+1, j-1]) / (2 * dx))-
+                                   ((v[i, j+1] - v[j-1, j+1]) / (2 * dy))^2))
+          
+          # Periodic BC Pressure @ x = 2
+          b[i+1, ny] = (rho * (1 / dt * ((u[i+1, 2] - u[i+1, ny-1]) / (2 * dx) +
+                                             (v[i, ny] - v[j-1, ny]) / (2 * dy)) -
+                                   ((u[i+1, 2] - u[i+1, ny-1]) / (2 * dx))^2 -
+                                   2 * ((u[i, ny] - u[j-1, ny]) / (2 * dy) *
+                                        (v[i+1, 2] - v[i+1, ny-1]) / (2 * dx)) -
+                                   ((v[i, ny] - v[j-1, ny]) / (2 * dy))^2))
 
-     # Periodic BC Pressure @ x = 0
-     b[i+1, 2] = (rho * (1 / dt * ((u[i+1, 2] - u[i+1, ny]) / (2 * dx) +
-                                        (v[i, 2] - v[j-1, 2]) / (2 * dy)) -
-                              ((u[i+1, 2] - u[i+1, ny]) / (2 * dx))^2 -
-                              2 * ((u[i, 2] - u[j-1, 2]) / (2 * dy) *
-                                   (v[i+1, 2] - v[i+1, ny]) / (2 * dx))-
-                              ((v[i, 2] - v[j-1, 2]) / (2 * dy))^2))
-
+          # Periodic BC Pressure @ x = 0
+          b[i+1, 2] = (rho * (1 / dt * ((u[i+1, 2] - u[i+1, ny]) / (2 * dx) +
+                                             (v[i, 2] - v[j-1, 2]) / (2 * dy)) -
+                                   ((u[i+1, 2] - u[i+1, ny]) / (2 * dx))^2 -
+                                   2 * ((u[i, 2] - u[j-1, 2]) / (2 * dy) *
+                                        (v[i+1, 2] - v[i+1, ny]) / (2 * dx))-
+                                   ((v[i, 2] - v[j-1, 2]) / (2 * dy))^2))
+          =#
     end
     
     return
