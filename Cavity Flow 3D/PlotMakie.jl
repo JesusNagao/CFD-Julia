@@ -1,7 +1,4 @@
-using GLMakie
-using LinearAlgebra
-using GeometryBasics
-using Meshes
+using GLMakie,LinearAlgebra
 include("3DNavier.jl")
 
 #Produces a 3D vector plot of a given field
@@ -44,15 +41,15 @@ u, v, w, p = cavity_flow(nt, u, v, w, dt, dx, dy, dz, p, rho, nu)
 
 function map3d(u, v, w, X, Y, Z)
     
-    uvw = [Point3f(u[1,1,1], v[1,1,1], w[1,1,1])]
-    xyz = [Point3f(X[1,1,1], Y[1,1,1], Z[1,1,1])]
+    uvw = [Point3f0(u[1,1,1], v[1,1,1], w[1,1,1])]
+    xyz = [Point3f0(X[1,1,1], Y[1,1,1], Z[1,1,1])]
 
     for i in range(1, stop=nx)
         for j in range(1, stop=ny)
             for k in range(1, stop=nz)
                 if (i != 1 && j != 1 && k != 1)
-                    push!(uvw, Point3f(u[i,j,k], v[i,j,k], w[i,j,k]))
-                    push!(xyz, Point3f(X[i,j,k], Y[i,j,k], Z[i,j,k]))
+                    push!(uvw, Point3f0(u[i,j,k], v[i,j,k], w[i,j,k]))
+                    push!(xyz, Point3f0(X[i,j,k], Y[i,j,k], Z[i,j,k]))
                 end
             end
         end
@@ -66,6 +63,10 @@ end
 #CairoMakie.arrows(x,y,u[:,:,50],v[:,:,50], arrowcolor = leng)
 
 uvw, xyz= map3d(u, v, w, X, Y, Z)
-arrows(xyz, uvw, lengtscale = 0.001, arrowsize=0.03)
+
+#Normalizing
+uvwnorm = [norm(vec) != 0 ? vec/norm(vec) : vec for vec in uvw]
+
+arrows(xyz[1:3:end], uvw[1:3:end], lengthscale = 0.1, arrowsize=0.01,linewidth = 0.05,linecolor=norm.(uvw[1:3:end]))
 
 #CairoMakie.save("N2D.png", fig)

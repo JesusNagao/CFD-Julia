@@ -1,5 +1,6 @@
 using Plots
 using Base.Threads
+include("GPUKernel.jl")
 
 function meshgrid(x,y,z)
     X = [i for i in x, j in 1:length(y), k in 1:length(z)]
@@ -8,7 +9,6 @@ function meshgrid(x,y,z)
     return X, Y, Z
 end
 
-X,Y,Z = meshgrid(x,y,z)
 
 function build_up_b(b::Array{Float64,3}, rho::Float64, dt::Float64, u::Array{Float64,3}, v::Array{Float64,3},w::Array{Float64,3}, dx::Float64, dy::Float64, dz::Float64)
     
@@ -59,9 +59,9 @@ function pressure_poisson(p::Array{Float64,3}, dx::Float64, dy::Float64, dz::Flo
 
 end
 
-function cavity_flow(nt::Int64, u::Array{Float64,3}, v::Array{Float64,3},w::Array{Float64,3}, dt::Float64, dx::Float64, dy::Float64,dz::Float64, p::Array{Float64,3}, rho::Float64, nu::Float64)
+function cavity_flow_threads(nt::Int64, u::Array{Float64,3}, v::Array{Float64,3},w::Array{Float64,3}, dt::Float64, dx::Float64, dy::Float64,dz::Float64, p::Array{Float64,3}, rho::Float64, nu::Float64)
 
-    b = zeros((nx, ny, nz))
+    b = CuArray(zeros((nx, ny, nz)))
     
     @threads for n in range(1, stop = nt)
 

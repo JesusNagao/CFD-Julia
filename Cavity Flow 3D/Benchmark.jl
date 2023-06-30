@@ -1,5 +1,6 @@
 using LinearAlgebra
 using BenchmarkTools
+using GLMakie
 using Makie
 include("3DNavier.jl")
 include("3DNavierthreads.jl")

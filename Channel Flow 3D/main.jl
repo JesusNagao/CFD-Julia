@@ -39,7 +39,7 @@ function run(u::Array{Float64}, v::Array{Float64}, w::Array{Float64}, p::Array{F
     #wn[:, :, 1] .= 0.0
     #wn[:, :, nz-1] .= 0.0
 
-    periodic_bc(un, vn, wn, pn, nx, ny, nz, dx, dy, dz, dt, rho)
+    periodic_bc(u, v, w, un, vn, wn, pn, nx, ny, nz, dx, dy, dz, dt, rho)
 
     #return un, vn, wn
 
@@ -226,5 +226,5 @@ while n<nit
     #arrows!(xyz, uvw)
     global n = n + 1
 end
-uvw, xyz, strength = map3d(un, vn, wn, X, Y, Z)
-arrows(xyz, uvw, lengtscale = 0.001, arrowsize=0.03)
+#uvw, xyz, strength = map3d(un, vn, wn, X, Y, Z)
+#arrows(xyz, uvw, lengtscale = 0.001, arrowsize=0.03)
