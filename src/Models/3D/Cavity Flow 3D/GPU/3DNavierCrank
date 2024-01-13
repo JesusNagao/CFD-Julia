@@ -1,0 +1,156 @@
+using Base.Threads
+using LinearAlgebra
+using SparseArrays
+using CUDA
+
+function meshgrid(x,y,z)
+    X = [i for i in x, j in 1:length(y), k in 1:length(z)]
+    Y = [j for i in 1:length(x), j in y, k in 1:length(z)]
+    Z = [k for i in 1:length(x), j in 1:length(y), k in z]
+    return X, Y, Z
+end
+
+function boundary_conditions(u::Array{Float64,2})
+
+    """Function that takes a mesh, takes only the inner values and applies boundary conditions in that order"""
+
+    #Inner mesh 
+
+    inner = u[2:end-1,2:end-1]
+ 
+    #Reshaping into a column vector
+    col_vec_inner = reshape(transpose(inner), (1,:))
+
+    return col_vec_inner
+end
+
+function differential_operator_2D(n::Int64,α::Float64,β::Float64,γ::Float64,ζ::Float64, which::String)
+
+    """Function that returns the differential laplacian operator in 2D to solve for equations in a nxn grid"""
+
+    #Forming one block for the matrix, Xm and Ym are the coordinates of vals in the matrix
+    Xm = [1:n; 1:n-1; 2:n] 
+    Ym = [1:n; 2:n; 1:n-1] 
+    Vals_x = [fill(γ/2,n); fill(β, 2n-2)] #Main diagonal and x differential
+    Vals_y = [fill(γ/2,n); fill(α, 2n-2)] #Main diagonal and y differential
+
+    #Same process but for the first derivative operator
+    Xn = [1:n;1:n-1]
+    Yn = [1:n;2:n]
+    Vals_n = [fill(γ/2,n); fill(ζ, n-1)]
+
+    #Forming sparse matrices, the blocks are generated using the kronecker product with the identity matrix
+
+    #α is the factor for the x derivative, β for the y derivative and γ is used when taking a second order derivative,
+    #it takes into account the f_{ij} terms from the main diagonal
+
+    if which == "x"
+
+        D = sparse(Xm, Ym, Vals_x)
+        D_xx = kron(D, sparse(I,n,n))
+        Operator = D_xx 
+
+    elseif which == "y"
+
+        D = sparse(Xm, Ym, Vals_y)
+        D_yy = kron(sparse(I,n,n), D)
+        Operator = D_yy
+
+    elseif which == "xy"
+    
+        Block_D_xx = sparse(Xm, Ym, Vals_x)
+        Block_D_yy = sparse(Xm, Ym, Vals_y)
+
+        D_xx = kron(Block_D_xx, sparse(I,n,n))
+        D_yy = kron(sparse(I,n,n), Block_D_yy)
+        Operator = D_xx + D_yy
+
+
+    elseif which == "xn"
+
+        D = sparse(Yn,Xn, Vals_n)
+        D_nx = kron(sparse(I,n,n),D)
+        Operator = D_nx
+
+    elseif which == "yn"
+
+        D = sparse(Yn,Xn, Vals_n)
+        D_ny = kron(D,sparse(I,n,n))Projects
+        Operator = D_ny
+
+    end
+
+    return Operator
+
+end
+
+function poisson(p::Array{Float64,2}, nit::Int64, dx::Float64, dy::Float64, rho::Float64, dt::Float64, u::Array{Float64,2}, v::Array{Float64,2})
+
+    #Values to fill the diagonals
+    pα = dy^2/2*(dx^2+dy^2)
+    pβ = dx^2/2*(dx^2+dy^2)
+
+    density_factor = -(rho*dx^2*dy^2)/(2*(dx^2+dy^2))
+
+    uα = 1/(2*dt*dx)
+    uβ = 1/(2*dt*dy)
+
+    u_sq_α = -1/(2*dx)
+    v_sq_β = -1/(2*dy)
+
+    u_v_β = 1/(2*dy)
+    u_v_α = 1/(2*dx)
+
+    #Differential operators for each independent term of the equation
+
+    P = differential_operator_2D(length(p),pα,pβ,0.,0.,"xy")
+
+    U_x = differential_operator_2D(length(p),uα,uβ,0.,0.,"x")
+    U_x_2 = differential_operator_2D(length(p),u_sq_α,v_sq_β,0.,0.,"x")
+
+    V_y = differential_operator_2D(length(p),uα,uβ,0.,0.,"y")
+    V_y_2 = differential_operator_2D(length(p),u_sq_α,v_sq_β,0.,0.,"y")
+
+    UV_u = differential_operator_2D(length(p),u_v_α,u_v_β,0.,0.,"y")
+    UV_v = differential_operator_2D(length(p),u_v_α,u_v_β,0.,0.,"x")
+
+    #First calculating the terms not concerning the pressure term, which will be constant
+
+    b = density_factor * (U_x*u + V_y*v + (U_x_2*u).^2 + (V_y_2*v).^2 - 2*(UV_u*u).*(UV_v*v))
+
+    #Approximating the solution for the poisson equation using successive over relaxation
+
+    for n in range(1, stop = nit)
+
+        p = P*p + b
+
+    end
+
+    return p
+
+end
+
+function cavity_flow(nt::Int64, nit::Int64, u::Array{Float64,2}, v::Array{Float64,2},p::Array{Float64,2}, dt::Float64, dx::Float64, dy::Float64, rho::Float64, nu::Float64)
+    
+    uα = dt/dx
+    uβ = dt/dy
+
+    density_factor = -dt/(rho*2*dx)
+    #Differential operators for each independent term of the equation
+
+    U_x = differential_operator_2D(length(u),0.,0.,2*uα,-uα,"xn")
+    U_y = differential_operator_2D(length(u),0.,0.,2*uβ,-uβ,"xn")
+    
+    P = di
+
+    for t in range(1, stop = nt)
+
+        #Satisfying the pressure poisson equation at each time step, ensures continuity
+        p = poisson(p, nit, dx, dy, rho, dt, u, v)
+        
+        
+    end
+
+    return u, v, w, p
+
+end

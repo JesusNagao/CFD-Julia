@@ -1,4 +1,4 @@
-using Plots
+using GLMakie
 using Base.Threads
 
 nx = 41
@@ -108,7 +108,10 @@ function cavity_flow(nt::Int64, u::Array{Float64,2}, v::Array{Float64,2}, dt::Fl
         v[:,1]  .= 0
         v[:, end] .= 0
 
-        
+        ##How do I plot the resulting X,Y and p fields using GLMakie
+
+
+
         Plots.contourf(x,y,p, xlims = (0,2), ylims = (0,2), c = cgrad(:ice))
         Plots.quiver!(Y,X,quiver=(u[:,:],v[:,:]), xlims = (0,2), ylims = (0,2),c=:viridis)
         
