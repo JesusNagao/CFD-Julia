@@ -51,7 +51,7 @@ function Difussion(w::Wave; exportcsv = false)
     dx::Float64 = 2/(nx-1) #distance between grid points
     dt::Float64 = σ*dx^2/ν #time step
 
-
+    #Initialize wave to hat shape
     w.u[floor(Int64,0.5/dx):floor(Int64,1/ dx + 1),1] .= 2
 
     #Create animation for diffusion for nt steps
@@ -73,7 +73,7 @@ function Difussion(w::Wave; exportcsv = false)
     #    writedlm("Diff.csv", w.u, ',')
     #end
     
-    
+    #Create animation
     gif(difusse, "dif.gif", fps = 1000)
 
 end

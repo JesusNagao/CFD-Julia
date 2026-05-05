@@ -2,13 +2,14 @@ include("init_speed.jl")
 include("time.jl")
 using Plots;
 
-const nx = 81;
-const ny = 81;
-const nt = 100;
-const c = 1;
-const dx = 2 / (nx-1);
-const dy = 2 / (ny-1);
-const sigma = 0.2;
+#Initialize variables
+const nx = 81; #number of steps in the spatial x domain
+const ny = 81; #number of steps in the spatial y domain
+const nt = 100; #number of time steps
+const c = 1; #wave propagation speed
+const dx = 2 / (nx-1); #distance between grid points in the x axis
+const dy = 2 / (ny-1); #distance between grid points in the y axis
+const sigma = 0.2; 
 const dt = sigma * dx;
 
 x = Array{Float64}([i for i in range(0.0, stop=2.0, step=dx)])
